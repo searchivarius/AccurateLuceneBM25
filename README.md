@@ -42,4 +42,4 @@ We use the BM25 similarity function. The default parameter values are *k1=1.2* a
 Note on using Stanford NLP
 -----------------------
 
-One can use Stanford NLP to tokenize and lemmatize input. To activate Stanford NLP lemmatizer set the value of the constant UtilConst.USE_STANFORD in the file [UtilConst.java](src/main/UtilConst.java) to **true**. The code will be recomiplied automatically if you use our scripts to index/query. This doesn't seem to improve performance, though, but processing is longer.
+One can use Stanford NLP to tokenize and lemmatize input. To activate Stanford NLP lemmatizer set the value of the constant UtilConst.USE_STANFORD in the file [UtilConst.java](src/main/java/UtilConst.java#L33) to **true**. The code will be recomiplied automatically if you use our scripts to index/query. This doesn't seem to improve performance, though, but processing is longer.
