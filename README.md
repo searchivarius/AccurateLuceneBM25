@@ -30,7 +30,7 @@ It is possible to evaluate all questions, as well as randomly select a subset of
 ```
 .../trec_eval qrels.txt output_of_lucene_query
 ```
-We use the BM25 similarity function. The default parameter values are *k1=1.2* and *b=0.75*. This parameters can be changed using parameters *bm25_k1* and *bm25_b*.
+We use the BM25 similarity function. The default parameter values are *k1=1.2* and *b=0.75*. This parameters can be changed using parameters *bm25_k1* and *bm25_b*. In particular, better results are obtained for *k1=0.6* and *b=0.25*.
 
 Note on using Stanford NLP
 -----------------------
