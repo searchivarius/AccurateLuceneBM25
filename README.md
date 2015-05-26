@@ -35,4 +35,4 @@ It is possible to evaluate all questions, as well as randomly select a subset of
 Note on using Stanford NLP
 -----------------------
 
-We use Stanford NLP to tokenize and lemmatize input. This can be switched off by changing the value of the constant UtilConst.USE_STANFORD in the file [UtilConst.java](UtilConst.java). The code will be recomiplied automatically if you use our scripts to index/query.
+We use Stanford NLP to tokenize and lemmatize input. This can be switched off by changing the value of the constant UtilConst.USE_STANFORD in the file [UtilConst.java](src/main/UtilConst.java). The code will be recomiplied automatically if you use our scripts to index/query.
