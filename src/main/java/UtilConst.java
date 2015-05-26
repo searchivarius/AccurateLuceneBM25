@@ -21,9 +21,19 @@ public class UtilConst {
   /**
    * An text field
    */
-  public static final String FIELD_TEXT = "TEXT";  
+  public static final String FIELD_TEXT = "TEXT";
+  
+  /**
+   * True, if we lemmatize text during indexing AND retrieval. 
+   */
+  public static final boolean DO_LEMMATIZE = true;
+  /**
+   * True, if we use Stanford tokenizer.
+   */
+  public static final boolean USE_STANFORD = true;
   /**
    * True, if we want to carry out some basic cleanup of the XML fields.
    */
-  public static boolean DO_XML_CLEANUP = false;
+  public static final boolean DO_XML_CLEANUP = false;
+
 }

@@ -12,6 +12,20 @@
     <stanford.version>3.5.2</stanford.version>
   </properties>
 
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
 	<dependencies>
     <dependency>
       <groupId>org.apache.lucene</groupId>
@@ -38,6 +52,12 @@
 	    <artifactId>stanford-corenlp</artifactId>
 	    <version>${stanford.version}</version>
     </dependency>
+    <dependency>
+	    <groupId>edu.stanford.nlp</groupId>
+	    <artifactId>stanford-corenlp</artifactId>
+	    <version>${stanford.version}</version>
+      <classifier>models</classifier>
+    </dependency>
     <!-- We use some bzip2 tools from Ant -->
     <dependency>
       <groupId>org.apache.ant</groupId>
@@ -49,6 +69,11 @@
       <groupId>commons-configuration</groupId>
       <artifactId>commons-configuration</artifactId>
       <version>1.6</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.4</version>
     </dependency>
     <dependency>
       <groupId>commons-cli</groupId>

@@ -20,7 +20,7 @@ import org.apache.lucene.index.*;
 import org.apache.lucene.store.*;
 
 import java.io.*;
-import java.util.*;
+
 
 /**
  * <p>An indexing applications that reads a (compressed) Yahoo answers file
@@ -76,6 +76,8 @@ public class LuceneIndexer {
         Usage("Specify 'TREC-format QREL file'");
       }      
       
+      BufferedWriter qrelWriter = new BufferedWriter(new FileWriter(qrelFileName));
+      
       File outputDir = new File(outputDirName);
       if (!outputDir.exists()) {
         if (!outputDir.mkdirs()) {
@@ -100,6 +102,8 @@ public class LuceneIndexer {
       YahooAnswersStreamParser inpDoc = new YahooAnswersStreamParser(inputFileName,
                                                                      UtilConst.DO_XML_CLEANUP
                                                                      );
+      TextCleaner              textCleaner = new TextCleaner();
+      
       int answNum = 0;
       int questNum = 0;
       while (inpDoc.hasNext()) {
@@ -111,11 +115,21 @@ public class LuceneIndexer {
           Document  luceneDoc = new Document();
           
           String    id = quest.mQuestUri + "-" + answId;
+          String    rawAnswer = quest.mAnswers.get(answId);
+          String    cleanAnswer = textCleaner.cleanUp(rawAnswer);
+          
+//          System.out.println("=====================");
+//          System.out.println(rawAnswer);
+//          System.out.println("=====================");
+//          System.out.println(cleanAnswer);
+//          System.out.println("#####################");
         
           luceneDoc.add(new StringField(UtilConst.FIELD_ID, id, Field.Store.YES));
-          luceneDoc.add(new TextField(UtilConst.FIELD_TEXT, quest.mAnswers.get(answId), Field.Store.YES));
+          luceneDoc.add(new TextField(UtilConst.FIELD_TEXT, cleanAnswer, Field.Store.YES));
                
           indexWriter.addDocument(luceneDoc);
+          
+          saveQrelOneEntry(qrelWriter, quest.mQuestUri, id, answId == quest.mBestAnswId ? 1:0);
           ++answNum;
         }
         if (questNum % 1000 == 0) 
@@ -125,12 +139,30 @@ public class LuceneIndexer {
       
       System.out.println(String.format("Indexed %d questions (%d answers)", questNum, answNum));
       
-      indexWriter.close();      
+      indexWriter.close();
+      qrelWriter.close();
     } catch (ParseException e) {
       Usage("Cannot parse arguments");
     } catch(Exception e) {
       System.err.println("Terminating due to an exception: " + e);
       System.exit(1);
     }     
+  }
+
+  protected static final String NL = System.getProperty("line.separator");
+  
+  /**
+   * Add one line to the TREC QREL file. 
+   * 
+   * @param qrelFile
+   * @param topicId
+   * @param docId
+   * @param relGrade
+   */
+  public static void saveQrelOneEntry(BufferedWriter qrelFile,
+                                      String           topicId,
+                                      String           docId,
+                                      int              relGrade) throws IOException {
+    qrelFile.write(String.format("%s 0 %s %d%s", topicId, docId, relGrade, NL));
   }
 }

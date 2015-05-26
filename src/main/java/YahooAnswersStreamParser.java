@@ -106,6 +106,10 @@ public class YahooAnswersStreamParser implements Iterator<ParsedQuestion> {
    
     return null;    
   }
+  
+  public void close() throws XMLStreamException {
+    mReader.close();
+  }
 
   @Override
   public void remove() {
