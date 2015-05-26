@@ -191,11 +191,11 @@ public class LuceneQuery {
             // Using both the question and the content (i.e., detail field)
             String rawQuest = quest.mQuestion + " " + quest.mQuestDetail;
             String tokQuery = textCleaner.cleanUp(rawQuest);
-            System.out.println("=====================");
-            System.out.println(rawQuest);
-            System.out.println("=====================");
-            System.out.println(tokQuery);
-            System.out.println("#####################");
+//            System.out.println("=====================");
+//            System.out.println(rawQuest);
+//            System.out.println("=====================");
+//            System.out.println(tokQuery);
+//            System.out.println("#####################");
             String query = TextCleaner.luceneSafeCleanUp(tokQuery);
             
             ResEntry [] results = candProvider.getCandidates(questNum, 
