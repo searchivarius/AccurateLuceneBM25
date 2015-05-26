@@ -1,0 +1,60 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+  <groupId>edu.cmu.lti.oaqa</groupId>
+  <artifactId>yahoo_answers_lucene_baseline</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <name>Leo's baseline for the Yahoo-answers manner data set.</name>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <lucene.version>4.10.3</lucene.version>
+    <stanford.version>3.5.2</stanford.version>
+  </properties>
+
+	<dependencies>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-queryparser</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-common</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-codecs</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
+    <dependency>
+	    <groupId>edu.stanford.nlp</groupId>
+	    <artifactId>stanford-corenlp</artifactId>
+	    <version>${stanford.version}</version>
+    </dependency>
+    <!-- We use some bzip2 tools from Ant -->
+    <dependency>
+      <groupId>org.apache.ant</groupId>
+      <artifactId>ant</artifactId>
+      <version>1.9.4</version>
+    </dependency>
+    <!-- some Apache commons -->
+    <dependency>
+      <groupId>commons-configuration</groupId>
+      <artifactId>commons-configuration</artifactId>
+      <version>1.6</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-cli</groupId>
+      <artifactId>commons-cli</artifactId>
+      <version>1.2</version>
+    </dependency>
+
+	</dependencies>
+</project>
