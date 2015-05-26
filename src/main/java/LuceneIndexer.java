@@ -102,7 +102,7 @@ public class LuceneIndexer {
       YahooAnswersStreamParser inpDoc = new YahooAnswersStreamParser(inputFileName,
                                                                      UtilConst.DO_XML_CLEANUP
                                                                      );
-      TextCleaner              textCleaner = new TextCleaner();
+      TextCleaner              textCleaner = new TextCleaner(null);
       
       int answNum = 0;
       int questNum = 0;

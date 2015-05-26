@@ -30,10 +30,10 @@ public class UtilConst {
   /**
    * True, if we use Stanford tokenizer.
    */
-  public static final boolean USE_STANFORD = true;
+  public static final boolean USE_STANFORD = false;
   /**
    * True, if we want to carry out some basic cleanup of the XML fields.
    */
-  public static final boolean DO_XML_CLEANUP = false;
+  public static final boolean DO_XML_CLEANUP = true;
 
 }

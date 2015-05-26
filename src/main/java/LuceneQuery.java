@@ -44,6 +44,7 @@ public class LuceneQuery {
     System.err.println("Usage: " 
                        + "-d <index directory> "
                        + "-i <input file> "
+                       + "-s <optional stop word file> "
                        + "-n <max # of results> "
                        + "-o <a prefix for TREC-style output files> "
                        + "-prob <optional question sampling probability> "
@@ -61,6 +62,7 @@ public class LuceneQuery {
     
     options.addOption("d",      null, true, "index directory");
     options.addOption("i",      null, true, "input file");
+    options.addOption("s",      null, true, "stop word file");
     options.addOption("n",      null, true, "max # of results");
     options.addOption("o",      null, true, "a prefix for TREC-style output files");
     options.addOption("r",      null, true, "an optional QREL file, if specified," +
@@ -93,6 +95,14 @@ public class LuceneQuery {
       } else {
         Usage("Specify 'input file'");
       }
+      
+      DictNoComments    stopWords = null;
+      
+      if (cmd.hasOption("s")) {
+        String stopWordFileName = cmd.getOptionValue("s");
+        stopWords = new DictNoComments(new File(stopWordFileName), true /* lowercasing */);
+        System.out.println("Using the stopword file: " + stopWordFileName);
+      }      
       
       int numRet = 100;
       
@@ -169,7 +179,7 @@ public class LuceneQuery {
       }      
       
       LuceneCandidateProvider candProvider = new LuceneCandidateProvider(indexDir, analyzer, similarity);
-      TextCleaner             textCleaner = new TextCleaner();
+      TextCleaner             textCleaner = new TextCleaner(stopWords);
       
       for (int iterNum = 1; iterNum <= sampleQty; ++iterNum) {
         // Let's re-read
@@ -191,12 +201,13 @@ public class LuceneQuery {
             // Using both the question and the content (i.e., detail field)
             String rawQuest = quest.mQuestion + " " + quest.mQuestDetail;
             String tokQuery = textCleaner.cleanUp(rawQuest);
+            String query = TextCleaner.luceneSafeCleanUp(tokQuery);
+            
 //            System.out.println("=====================");
 //            System.out.println(rawQuest);
 //            System.out.println("=====================");
-//            System.out.println(tokQuery);
-//            System.out.println("#####################");
-            String query = TextCleaner.luceneSafeCleanUp(tokQuery);
+//            System.out.println(query);
+//            System.out.println("#####################");            
             
             ResEntry [] results = candProvider.getCandidates(questNum, 
                                                              query, 

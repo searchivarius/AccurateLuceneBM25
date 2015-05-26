@@ -32,37 +32,58 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
  *
  */
 public class TextCleaner {
-  public TextCleaner() {
-    initTextCleaner(UtilConst.USE_STANFORD, UtilConst.DO_LEMMATIZE);
+  public TextCleaner(DictNoComments stopWords) {
+    initTextCleaner(stopWords, UtilConst.USE_STANFORD, UtilConst.DO_LEMMATIZE);
   }
-  private void initTextCleaner(boolean useStanford, boolean lemmatize) {
+  private void initTextCleaner(DictNoComments stopWords, 
+                               boolean useStanford, 
+                               boolean lemmatize) {
+    mStopWords = stopWords;
     mUseStanford = useStanford;
-    mLemmatize = lemmatize;
-    Properties props = new Properties();
-    if (lemmatize)
-      props.setProperty("annotators", "tokenize, ssplit, pos, lemma");
-    else
-      props.setProperty("annotators", "tokenize");
-    
-    mPipeline = new StanfordCoreNLP(props);  
+    if (mUseStanford) {
+      mLemmatize = lemmatize;
+      Properties props = new Properties();
+      if (lemmatize)
+        props.setProperty("annotators", "tokenize, ssplit, pos, lemma");
+      else
+        props.setProperty("annotators", "tokenize");
+      
+      mPipeline = new StanfordCoreNLP(props);
+    }
   }
   
   public String cleanUp(String text) {
+    StringBuffer sb = new StringBuffer();
+    
     if (mUseStanford) {
       Annotation doc = new Annotation(text);
       mPipeline.annotate(doc);
       
-      StringBuffer sb = new StringBuffer();
+ 
       
       for (CoreLabel token: doc.get(CoreAnnotations.TokensAnnotation.class)) {
         String word = mLemmatize ?
                       token.get(LemmaAnnotation.class) :
                       token.get(TextAnnotation.class);
+        word = word.toLowerCase();
+        // Ignore stop words if the stopword dictionary is present
+//        System.out.println(String.format("%s %b", word, mStopWords.contains(word)));
+        if (mStopWords != null && mStopWords.contains(word)) continue; 
         sb.append(word);
         sb.append(' ');
       }
-      return sb.toString();
-    } else return text;
+    } else {
+      // If Stanford is not present using a simpler tokenizer.
+      for (String s: text.replaceAll("\\s", " ").split("[!:;, ]+")) {
+        String word = s.toLowerCase();
+        // Ignore stop words if the stopword dictionary is present
+        if (mStopWords != null && mStopWords.contains(word)) continue; 
+        sb.append(word);
+        sb.append(' ');        
+      }
+    }
+    return sb.toString();
+ 
   }
   
   /**
@@ -74,6 +95,7 @@ public class TextCleaner {
   }
   
   private StanfordCoreNLP   mPipeline = null;
+  private DictNoComments    mStopWords = null;
   private boolean           mLemmatize = false;
   private boolean           mUseStanford = false;
 }

@@ -28,8 +28,9 @@ run/lucene_query.sh
 ```
 It is possible to evaluate all questions, as well as randomly select a subset of question multiple times. The output produced in each sampling iteration is saved to a separate file. A sample invokation of lucene_query.sh:
 ```
-run/lucene_query.sh -d ~/lucene/yahoo_answers_baseline/ -i /home/leo/TextCollect/YahooAnswers/Manner/manner-v2.0/manner.xml.bz2 -n 15 -o eval/out -prob 0.01 -bm25_k1 0.6 -bm25_b 0.25 -sample_qty 2
+run/lucene_query.sh -d ~/lucene/yahoo_answers_baseline/ -i /home/leo/TextCollect/YahooAnswers/Manner/manner-v2.0/manner.xml.bz2 -n 15 -o eval/out -prob 0.01 -bm25_k1 0.6 -bm25_b 0.25 -sample_qty 2 -s data/stopwords.txt
 ```
+Note the **stopword** file!
 
 
 The effectiveness can be evaluated using the above mentioned *trec_eval* utility and *QREL* files **produced during indexing**. An example of using *trec_eval*:
@@ -41,4 +42,4 @@ We use the BM25 similarity function. The default parameter values are *k1=1.2* a
 Note on using Stanford NLP
 -----------------------
 
-We use Stanford NLP to tokenize and lemmatize input. This can be switched off by changing the value of the constant UtilConst.USE_STANFORD in the file [UtilConst.java](src/main/UtilConst.java). The code will be recomiplied automatically if you use our scripts to index/query.
+One can use Stanford NLP to tokenize and lemmatize input. To activate Stanford NLP lemmatizer set the value of the constant UtilConst.USE_STANFORD in the file [UtilConst.java](src/main/UtilConst.java) to **true**. The code will be recomiplied automatically if you use our scripts to index/query. This doesn't seem to improve performance, though, but processing is longer.
