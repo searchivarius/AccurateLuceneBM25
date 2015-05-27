@@ -201,7 +201,7 @@ public class LuceneQuery {
             // Using both the question and the content (i.e., detail field)
             String rawQuest = quest.mQuestion + " " + quest.mQuestDetail;
             String tokQuery = textCleaner.cleanUp(rawQuest);
-            String query = TextCleaner.luceneSafeCleanUp(tokQuery);
+            String query = TextCleaner.luceneSafeCleanUp(tokQuery).trim();
             
 //            System.out.println("=====================");
 //            System.out.println(rawQuest);
@@ -209,9 +209,25 @@ public class LuceneQuery {
 //            System.out.println(query);
 //            System.out.println("#####################");            
             
-            ResEntry [] results = candProvider.getCandidates(questNum, 
-                                                             query, 
-                                                             numRet);
+            ResEntry [] results = null;
+            
+            if (query.isEmpty()) {
+              results = new ResEntry[0];
+              System.out.println(
+                  String.format("WARNING, empty query id = '%s'", quest.mQuestUri));
+            } else {
+              
+              try {
+                results = candProvider.getCandidates(questNum, query, 
+                                                               numRet);
+              } catch (ParseException e) {
+                e.printStackTrace();
+                System.err.println("Error parsing query: " + query + " orig question is :" 
+                                   + rawQuest);
+                System.exit(1);
+              }
+            }
+            
             boolean bSave = true;
             
             if (qrels != null) {

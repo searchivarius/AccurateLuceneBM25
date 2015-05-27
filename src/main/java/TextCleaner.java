@@ -91,7 +91,7 @@ public class TextCleaner {
    * 
    */
   public static String luceneSafeCleanUp(String s) {
-    return s.replaceAll("[-&|!(){}\\[\\]^\"~*?:\\\\/]", " ");
+    return s.replace('+', ' ').replaceAll("[-&|!(){}\\[\\]^\"~*?:\\\\/]", " ");
   }
   
   private StanfordCoreNLP   mPipeline = null;
