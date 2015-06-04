@@ -111,7 +111,8 @@ public class LuceneIndexer {
         
         ParsedQuestion  quest = inpDoc.next();
         
-        for (int answId = 0; answId < quest.mAnswers.size(); ++answId) {                  
+        for (int answId = 0; answId < quest.mAnswers.size(); ++answId) 
+        if (quest.mBestAnswId == answId) {                  
           Document  luceneDoc = new Document();
           
           String    id = quest.mQuestUri + "-" + answId;
