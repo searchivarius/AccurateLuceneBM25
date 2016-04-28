@@ -25,6 +25,8 @@ import org.apache.lucene.search.similarities.BM25Similarity;
 import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.FSDirectory;
 
+import com.google.common.base.Splitter;
+
 public class LuceneCandidateProvider {
   /**
    * Determines if a QREL label defines a relevant entry.
@@ -65,8 +67,16 @@ public class LuceneCandidateProvider {
   public ResEntry[] getCandidates(int queryNum, 
                                 String query, 
                                 int maxQty) throws Exception {
+    ArrayList<String>   toks = new ArrayList<String>();
+    for (String s: mSpaceSplit.split(query)) {  
+      toks.add(s);
+    }
+    if (2 * toks.size() > BooleanQuery.getMaxClauseCount()) {
+      // This a heuristic, but it should work fine in many cases
+      BooleanQuery.setMaxClauseCount(2 * toks.size());
+    }
+
     ArrayList<ResEntry> resArr = new ArrayList<ResEntry>();
-    
     
     Query       queryParsed = mParser.parse(query);
     
@@ -92,4 +102,7 @@ public class LuceneCandidateProvider {
   private Similarity    mSimilarity = null;
   private Analyzer      mAnalyzer = null;
   private QueryParser   mParser = null;
+
+  private static Splitter mSpaceSplit = Splitter.on(' ').omitEmptyStrings().trimResults();
+
 }

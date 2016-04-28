@@ -58,6 +58,11 @@
 	    <version>${stanford.version}</version>
       <classifier>models</classifier>
     </dependency>
+    <dependency>
+      <artifactId>guava</artifactId>
+      <groupId>com.google.guava</groupId>
+      <version>12.0</version>
+    </dependency>
     <!-- We use some bzip2 tools from Ant -->
     <dependency>
       <groupId>org.apache.ant</groupId>
