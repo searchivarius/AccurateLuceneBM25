@@ -16,12 +16,13 @@
 import java.util.*;
 import java.io.*;
 
+import java.nio.file.Paths;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.*;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
-import org.apache.lucene.search.similarities.BM25Similarity;
 import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.FSDirectory;
 
@@ -56,7 +57,7 @@ public class LuceneCandidateProvider {
     if (!indexDir.exists()) {
       throw new Exception(String.format("Directory '%s' doesn't exist", indexDirName)); 
     }
-    mReader = DirectoryReader.open(FSDirectory.open(indexDir));
+    mReader = DirectoryReader.open(FSDirectory.open(Paths.get(indexDirName)));
     mSearcher = new IndexSearcher(mReader);
     mSearcher.setSimilarity(mSimilarity);
     

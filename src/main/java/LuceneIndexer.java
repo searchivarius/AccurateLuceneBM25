@@ -17,10 +17,15 @@ import org.apache.commons.cli.*;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.*;
+import org.apache.lucene.index.IndexWriterConfig.OpenMode;
+import org.apache.lucene.search.similarities.BM25Similarity;
 import org.apache.lucene.store.*;
 
+import java.nio.file.Paths;
 import java.io.*;
 
+
+// Partially based on https://lucene.apache.org/core/6_0_0/demo/src-html/org/apache/lucene/demo/IndexFiles.html
 
 /**
  * <p>An indexing applications that reads a (compressed) Yahoo answers file
@@ -35,21 +40,24 @@ import java.io.*;
  */
 
 public class LuceneIndexer {
-  static void Usage(String err) {
+  static void Usage(String err, Options opt) {
     System.err.println("Error: " + err);
-    System.err.println("Usage: -i <input file> " +
-                       "-o <output directory> " +
-                       "-r <output TREC-format QREL file>");
-
+    HelpFormatter formatter = new HelpFormatter();
+    formatter.printHelp( "LuceneIndexer", opt);      
     System.exit(1);
-  }  
+  } 
   
   public static void main(String [] args) {
     Options options = new Options();
     
-    options.addOption("i", null, true, "input file");
-    options.addOption("o", null, true, "output directory");
-    options.addOption("r", null, true, "output TREC-format QREL file");
+    options.addOption("i", 			null, true, "input file");
+    options.addOption("o", 			null, true, "output directory");
+    options.addOption("r", 			null, true, "output TREC-format QREL file");
+    options.addOption("bm25fixed", 	null, false, "use the fixed BM25 similarity");
+    
+    // If you increase this value, you may need to modify the following line in *.sh file
+    // export MAVEN_OPTS="-Xms8192m -server"
+    double ramBufferSizeMB = 1024 * 8; // 8 GB
     
     CommandLineParser parser = new org.apache.commons.cli.GnuParser();
     
@@ -61,19 +69,19 @@ public class LuceneIndexer {
       if (cmd.hasOption("i")) {
         inputFileName = cmd.getOptionValue("i");
       } else {
-        Usage("Specify 'input file'");
+        Usage("Specify 'input file'", options);
       }
       
       if (cmd.hasOption("o")) {
         outputDirName = cmd.getOptionValue("o");
       } else {
-        Usage("Specify 'index directory'");
+        Usage("Specify 'index directory'", options);
       }
       
       if (cmd.hasOption("r")) {
         qrelFileName = cmd.getOptionValue("r");
       } else {
-        Usage("Specify 'TREC-format QREL file'");
+        Usage("Specify 'TREC-format QREL file'", options);
       }      
       
       BufferedWriter qrelWriter = new BufferedWriter(new FileWriter(qrelFileName));
@@ -92,11 +100,25 @@ public class LuceneIndexer {
       if (!outputDir.canWrite()) {
         System.out.println("Can't write to " + outputDir.getAbsolutePath());
         System.exit(1);
-      }            
+      }
+      
+      boolean useFixedBM25 = cmd.hasOption("useFixedBM25");
 
       EnglishAnalyzer   analyzer = new EnglishAnalyzer();
-      FSDirectory       indexDir    = FSDirectory.open(outputDir);
-      IndexWriterConfig indexConf   = new IndexWriterConfig(analyzer.getVersion(), analyzer);
+      FSDirectory       indexDir    = FSDirectory.open(Paths.get(outputDirName));
+      IndexWriterConfig indexConf   = new IndexWriterConfig(analyzer);
+      
+      indexConf.setOpenMode(OpenMode.CREATE); // Overwrite the 
+      indexConf.setRAMBufferSizeMB(ramBufferSizeMB);
+      
+      if (useFixedBM25) {
+        System.out.println("Using fixed BM25Simlarity!");
+        indexConf.setSimilarity(new BM25SimilarityFix());
+      } else {
+        indexConf.setSimilarity(new BM25Similarity());
+        System.out.println("Using Lucene BM25Similarity");
+      }
+      
       IndexWriter       indexWriter = new IndexWriter(indexDir, indexConf);
       
       YahooAnswersStreamParser inpDoc = new YahooAnswersStreamParser(inputFileName,
@@ -143,7 +165,8 @@ public class LuceneIndexer {
       indexWriter.close();
       qrelWriter.close();
     } catch (ParseException e) {
-      Usage("Cannot parse arguments");
+      e.printStackTrace(); 	
+      Usage("Cannot parse arguments" + e, options);
     } catch(Exception e) {
       System.err.println("Terminating due to an exception: " + e);
       System.exit(1);

@@ -1,5 +1,8 @@
 #/bin/bash
-tr=`mktemp --tmpdir=run lucene_query.XXX`
-echo "mvn compile exec:java -Dexec.mainClass=LuceneQuery -Dexec.args='$@' " > $tr
-. $tr
-rm $tr
+export MAVEN_OPTS="-Xms8192m -server"
+bash_cmd="mvn compile exec:java -Dexec.mainClass=LuceneQuery -Dexec.args='$@' "
+bash -c "$bash_cmd"
+if [ "$?" != "0" ] ; then
+  exit 1
+fi
+

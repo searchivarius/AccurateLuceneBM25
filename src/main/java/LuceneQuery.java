@@ -39,23 +39,12 @@ public class LuceneQuery {
   private final static String TREC_RUN = "fakerun";
   private final static String NL = System.getProperty("line.separator");
   
-  static void Usage(String err) {
+  static void Usage(String err, Options opt) {
     System.err.println("Error: " + err);
-    System.err.println("Usage: " 
-                       + "-d <index directory> "
-                       + "-i <input file> "
-                       + "-s <optional stop word file> "
-                       + "-n <max # of results> "
-                       + "-o <a prefix for TREC-style output files> "
-                       + "-prob <optional question sampling probability> "
-                       + "-sample_qty <an optional number of sampling iterations> "
-                       + "-bm25_b <optional BM25 parameter: b> "
-                       + "-bm25_k1 <optional BM25 parameter: k1> "
-                       + "-r <an optional QREL file, if specified, we save results only for queries " +
-                         " for which we find at least one relevant entry> "
-                       );
+    HelpFormatter formatter = new HelpFormatter();
+    formatter.printHelp( "LuceneQuery", opt);      
     System.exit(1);
-  }  
+  } 
 
   public static void main(String[] args) {
     Options options = new Options();
@@ -85,7 +74,7 @@ public class LuceneQuery {
       if (cmd.hasOption("d")) {
         indexDir = cmd.getOptionValue("d");
       } else {
-        Usage("Specify 'index directory'"); 
+        Usage("Specify 'index directory'", options); 
       }
       
       String inputFileName = null;
@@ -93,7 +82,7 @@ public class LuceneQuery {
       if (cmd.hasOption("i")) {
         inputFileName = cmd.getOptionValue("i");
       } else {
-        Usage("Specify 'input file'");
+        Usage("Specify 'input file'", options);
       }
       
       DictNoComments    stopWords = null;
@@ -116,7 +105,7 @@ public class LuceneQuery {
       if (cmd.hasOption("o")) {
         trecOutFileNamePrefix = cmd.getOptionValue("o");
       } else {
-        Usage("Specify 'a prefix for TREC-style output files'");
+        Usage("Specify 'a prefix for TREC-style output files'", options);
       }
       
       double fProb = 1.0f;
@@ -125,12 +114,12 @@ public class LuceneQuery {
         try {
           fProb = Double.parseDouble(cmd.getOptionValue("prob"));
         } catch (NumberFormatException e) {
-          Usage("Wrong format for 'question sampling probability'");
+          Usage("Wrong format for 'question sampling probability'", options);
         }
       }   
       
       if (fProb <= 0 || fProb > 1) {
-        Usage("Question sampling probability should be >0 and <=1");
+        Usage("Question sampling probability should be >0 and <=1", options);
       }
       
       System.out.println("Sample the following fraction of questions: " + fProb);
@@ -141,7 +130,7 @@ public class LuceneQuery {
         try {
           bm25_k1 = Float.parseFloat(cmd.getOptionValue("bm25_k1"));
         } catch (NumberFormatException e) {
-          Usage("Wrong format for 'bm25_k1'");
+          Usage("Wrong format for 'bm25_k1'", options);
         }
       }
       
@@ -149,7 +138,7 @@ public class LuceneQuery {
         try {
           bm25_b = Float.parseFloat(cmd.getOptionValue("bm25_b"));
         } catch (NumberFormatException e) {
-          Usage("Wrong format for 'bm25_b'");
+          Usage("Wrong format for 'bm25_b'", options);
         }
       }   
       
@@ -164,7 +153,7 @@ public class LuceneQuery {
         try {
           sampleQty = Integer.parseInt(cmd.getOptionValue("sample_qty"));
         } catch (NumberFormatException e) {
-          Usage("Wrong format for 'sample_qty'");
+          Usage("Wrong format for 'sample_qty'", options);
         }
       }
       
@@ -262,7 +251,8 @@ public class LuceneQuery {
       }
       
     } catch (ParseException e) {
-      Usage("Cannot parse arguments");
+      e.printStackTrace();
+      Usage("Cannot parse arguments: " + e, options);
     } catch(Exception e) {
       System.err.println("Terminating due to an exception: " + e);
       System.exit(1);
