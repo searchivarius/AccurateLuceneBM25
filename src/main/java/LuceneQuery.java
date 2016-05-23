@@ -204,6 +204,9 @@ public class LuceneQuery {
           new BufferedWriter(new FileWriter(new File(trecOutFileName)));
       
       int questNum = 0;
+      
+      long totalTimeMS = 0;
+      
       while (inpDoc.hasNext()) {
         if (questNum >= maxQueryQty) break;
         ++questNum;
@@ -232,8 +235,19 @@ public class LuceneQuery {
           } else {
             
             try {
+              long start = System.currentTimeMillis();
+              
               results = candProvider.getCandidates(questNum, query, 
                                                              numRet);
+              
+              long end = System.currentTimeMillis();
+              long searchTimeMS = end - start;
+              totalTimeMS += searchTimeMS;
+              
+              System.out.println(String.format("Obtained results for the query # %d, the search took %d ms, we asked for max %d entries got %d", 
+                                 questNum, searchTimeMS, numRet, results.length));
+
+              
             } catch (ParseException e) {
               e.printStackTrace();
               System.err.println("Error parsing query: " + query + " orig question is :" 
@@ -269,7 +283,7 @@ public class LuceneQuery {
         
       }
       
-      System.out.println(String.format("Proccessed %d questions", questNum));        
+      System.out.println(String.format("Proccessed %d questions, the search took %f MS on average", questNum, (float)totalTimeMS/questNum));        
       
       trecOutFile.close();
       inpDoc.close();
