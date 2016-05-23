@@ -102,7 +102,7 @@ public class LuceneIndexer {
         System.exit(1);
       }
       
-      boolean useFixedBM25 = cmd.hasOption("useFixedBM25");
+      boolean useFixedBM25 = cmd.hasOption("bm25fixed");
 
       EnglishAnalyzer   analyzer = new EnglishAnalyzer();
       FSDirectory       indexDir    = FSDirectory.open(Paths.get(outputDirName));
@@ -115,8 +115,8 @@ public class LuceneIndexer {
         System.out.println("Using fixed BM25Simlarity!");
         indexConf.setSimilarity(new BM25SimilarityFix());
       } else {
-        indexConf.setSimilarity(new BM25Similarity());
         System.out.println("Using Lucene BM25Similarity");
+        indexConf.setSimilarity(new BM25Similarity());
       }
       
       IndexWriter       indexWriter = new IndexWriter(indexDir, indexConf);

@@ -19,6 +19,7 @@ import org.apache.lucene.search.similarities.BM25Similarity;
 import org.apache.lucene.search.similarities.Similarity;
 
 import java.io.*;
+import java.util.Random;
 
 /**
  * <p>A Lucene query application that reads questions from the Yahoo answers
@@ -61,12 +62,16 @@ public class LuceneQuery {
     options.addOption("sample_qty", null, true, "a number of sampling iterations");
     options.addOption("bm25_b",     null, true, "BM25 parameter: b");
     options.addOption("bm25_k1",    null, true, "BM25 parameter: k1");
+    options.addOption("bm25fixed",  null, false, "use the fixed BM25 similarity");
+    
+    options.addOption("seed",       null, true, "random seed");
 
     CommandLineParser parser = new org.apache.commons.cli.GnuParser(); 
     
     QrelReader qrels = null;
     
     try {
+      
       CommandLine cmd = parser.parse(options, args);
       
       String indexDir = null;
@@ -140,12 +145,32 @@ public class LuceneQuery {
         } catch (NumberFormatException e) {
           Usage("Wrong format for 'bm25_b'", options);
         }
-      }   
+      }  
+      
+      long seed = 0;
+      
+      String tmpl = cmd.getOptionValue("seed");
+      
+      if (tmpl != null) seed = Long.parseLong(tmpl);
+      
+      System.out.println("Using seed: " + seed);
+      
+      Random randGen = new Random(seed);
       
       System.out.println(String.format("BM25 parameters k1=%f b=%f ", bm25_k1, bm25_b));
       
+      boolean useFixedBM25 = cmd.hasOption("bm25fixed");
+      
       EnglishAnalyzer   analyzer = new EnglishAnalyzer();
-      Similarity        similarity = new BM25Similarity(bm25_k1, bm25_b);
+      Similarity        similarity = null;
+      
+      if (useFixedBM25) {
+        System.out.println("Using fixed BM25Simlarity!");
+        similarity = new BM25SimilarityFix(bm25_k1, bm25_b);
+      } else {
+        System.out.println("Using Lucene BM25Similarity");
+        similarity = new BM25Similarity(bm25_k1, bm25_b);
+      }
       
       int sampleQty = 1;
       
@@ -186,7 +211,7 @@ public class LuceneQuery {
           ParsedQuestion  quest = inpDoc.next();
           String queryID = quest.mQuestUri;
           
-          if (Math.random() <= fProb) {
+          if (randGen.nextDouble() <= fProb) {
             // Using both the question and the content (i.e., detail field)
             String rawQuest = quest.mQuestion + " " + quest.mQuestDetail;
             String tokQuery = textCleaner.cleanUp(rawQuest);
