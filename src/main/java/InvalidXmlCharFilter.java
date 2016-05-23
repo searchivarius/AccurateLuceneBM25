@@ -22,8 +22,10 @@ public class InvalidXmlCharFilter extends Reader {
       isGood = (c==0x9) || (c==0xA) || (c==0xD);
     } else {
       if (c <= 0xD7FF) {
+        // U+0020 -> U+D7FF
         isGood = true;
-      } else isGood = (c <= 0xE000) && (c <= 0xFFFD);
+        // U+E000 -> U+FFFD
+      } else isGood = (c >= 0xE000) && (c <= 0xFFFD);
     }
     if (!isGood) {
       System.err.println(String.format("Ignoring invalid Unicode character with the code 0x%X", (long)c));
