@@ -41,7 +41,8 @@ public class YahooAnswersStreamParser implements Iterator<ParsedQuestion> {
 
     final XMLInputFactory factory = XMLInputFactory.newInstance();
     factory.setProperty(XMLInputFactory.IS_COALESCING, true);
-    mReader = factory.createXMLStreamReader(CompressUtils.createInputStream(fileName));    
+    InputStream is = CompressUtils.createInputStream(fileName);
+    mReader = factory.createXMLStreamReader(new InvalidXmlCharFilter(new InputStreamReader(is, "UTF-8")));    
     mNextDoc = fetchNext();
   }
   
