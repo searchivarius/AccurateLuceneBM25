@@ -54,12 +54,12 @@ public class LuceneQuery {
     options.addOption("i",      null, true, "input file");
     options.addOption("s",      null, true, "stop word file");
     options.addOption("n",      null, true, "max # of results");
-    options.addOption("o",      null, true, "a prefix for TREC-style output files");
+    options.addOption("o",      null, true, "a TREC-style output file");
     options.addOption("r",      null, true, "an optional QREL file, if specified," +
         "we save results only for queries for which we find at least one relevant entry.");
     
     options.addOption("prob",       null, true, "question sampling probability");
-    options.addOption("sample_qty", null, true, "a number of sampling iterations");
+    options.addOption("max_query_qty", null, true, "a maximum number of queries to run");
     options.addOption("bm25_b",     null, true, "BM25 parameter: b");
     options.addOption("bm25_k1",    null, true, "BM25 parameter: k1");
     options.addOption("bm25fixed",  null, false, "use the fixed BM25 similarity");
@@ -105,12 +105,12 @@ public class LuceneQuery {
         System.out.println("Retrieving at most " + numRet + " candidate entries.");
       }
       
-      String trecOutFileNamePrefix = null;
+      String trecOutFileName = null;
       
       if (cmd.hasOption("o")) {
-        trecOutFileNamePrefix = cmd.getOptionValue("o");
+        trecOutFileName = cmd.getOptionValue("o");
       } else {
-        Usage("Specify 'a prefix for TREC-style output files'", options);
+        Usage("Specify 'a TREC-style output file'", options);
       }
       
       double fProb = 1.0f;
@@ -172,19 +172,18 @@ public class LuceneQuery {
         similarity = new BM25Similarity(bm25_k1, bm25_b);
       }
       
-      int sampleQty = 1;
+      int maxQueryQty = Integer.MAX_VALUE;
       
-      if (cmd.hasOption("sample_qty")) {
+      if (cmd.hasOption("max_query_qty")) {
         try {
-          sampleQty = Integer.parseInt(cmd.getOptionValue("sample_qty"));
+          maxQueryQty = Integer.parseInt(cmd.getOptionValue("max_query_qty"));
         } catch (NumberFormatException e) {
-          Usage("Wrong format for 'sample_qty'", options);
+          Usage("Wrong format for 'max_query_qty'", options);
         }
       }
       
       System.out.println(String.format(
-          "Carrying out %d sampling iterations using probability %f to select a question in each iteration",
-                                        sampleQty, fProb));      
+          "Executing at most %d queries", maxQueryQty));      
       
       if (cmd.hasOption("r")) {
         String qrelFile = cmd.getOptionValue("r");
@@ -195,85 +194,86 @@ public class LuceneQuery {
       LuceneCandidateProvider candProvider = new LuceneCandidateProvider(indexDir, analyzer, similarity);
       TextCleaner             textCleaner = new TextCleaner(stopWords);
       
-      for (int iterNum = 1; iterNum <= sampleQty; ++iterNum) {
-        // Let's re-read
-        YahooAnswersStreamParser inpDoc = new YahooAnswersStreamParser(inputFileName,
-            UtilConst.DO_XML_CLEANUP
-            );
-          
-        BufferedWriter trecOutFile = 
-            new BufferedWriter(new FileWriter(new File(trecOutFileNamePrefix + "." + iterNum)));
+
+      // Let's re-read
+      YahooAnswersStreamParser inpDoc = new YahooAnswersStreamParser(inputFileName,
+          UtilConst.DO_XML_CLEANUP
+          );
         
-        int questNum = 0;
-        while (inpDoc.hasNext()) {
-          ++questNum;
+      BufferedWriter trecOutFile = 
+          new BufferedWriter(new FileWriter(new File(trecOutFileName)));
+      
+      int questNum = 0;
+      while (inpDoc.hasNext()) {
+        if (questNum >= maxQueryQty) break;
+        ++questNum;
+        
+        ParsedQuestion  quest = inpDoc.next();
+        String queryID = quest.mQuestUri;
+        
+        if (randGen.nextDouble() <= fProb) {
+          // Using both the question and the content (i.e., detail field)
+          String rawQuest = quest.mQuestion + " " + quest.mQuestDetail;
+          String tokQuery = textCleaner.cleanUp(rawQuest);
+          String query = TextCleaner.luceneSafeCleanUp(tokQuery).trim();
           
-          ParsedQuestion  quest = inpDoc.next();
-          String queryID = quest.mQuestUri;
-          
-          if (randGen.nextDouble() <= fProb) {
-            // Using both the question and the content (i.e., detail field)
-            String rawQuest = quest.mQuestion + " " + quest.mQuestDetail;
-            String tokQuery = textCleaner.cleanUp(rawQuest);
-            String query = TextCleaner.luceneSafeCleanUp(tokQuery).trim();
-            
 //            System.out.println("=====================");
 //            System.out.println(rawQuest);
 //            System.out.println("=====================");
 //            System.out.println(query);
 //            System.out.println("#####################");            
+          
+          ResEntry [] results = null;
+          
+          if (query.isEmpty()) {
+            results = new ResEntry[0];
+            System.out.println(
+                String.format("WARNING, empty query id = '%s'", quest.mQuestUri));
+          } else {
             
-            ResEntry [] results = null;
-            
-            if (query.isEmpty()) {
-              results = new ResEntry[0];
-              System.out.println(
-                  String.format("WARNING, empty query id = '%s'", quest.mQuestUri));
-            } else {
-              
-              try {
-                results = candProvider.getCandidates(questNum, query, 
-                                                               numRet);
-              } catch (ParseException e) {
-                e.printStackTrace();
-                System.err.println("Error parsing query: " + query + " orig question is :" 
-                                   + rawQuest);
-                System.exit(1);
-              }
-            }
-            
-            boolean bSave = true;
-            
-            if (qrels != null) {
-              boolean bOk = false;
-              for (ResEntry r : results) {
-                String label = qrels.get(queryID, r.mDocId);
-                if (candProvider.isRelevLabel(label, 1)) {
-                  bOk = true;
-                  break;
-                }
-              }
-              if (!bOk) bSave = false;
-            }
-            
-//            System.out.println(String.format("Ranking results the query # %d queryId='%s' save results? %b", 
-//                                              questNum, queryID, bSave));          
-            if (bSave) {
-              saveTrecResults(queryID, results, trecOutFile, TREC_RUN, numRet);
+            try {
+              results = candProvider.getCandidates(questNum, query, 
+                                                             numRet);
+            } catch (ParseException e) {
+              e.printStackTrace();
+              System.err.println("Error parsing query: " + query + " orig question is :" 
+                                 + rawQuest);
+              System.exit(1);
             }
           }
           
-          if (questNum % 1000 == 0) 
-            System.out.println(String.format("Proccessed %d questions, iteration %d", questNum, iterNum));
-
+          boolean bSave = true;
           
+          if (qrels != null) {
+            boolean bOk = false;
+            for (ResEntry r : results) {
+              String label = qrels.get(queryID, r.mDocId);
+              if (candProvider.isRelevLabel(label, 1)) {
+                bOk = true;
+                break;
+              }
+            }
+            if (!bOk) bSave = false;
+          }
+          
+//            System.out.println(String.format("Ranking results the query # %d queryId='%s' save results? %b", 
+//                                              questNum, queryID, bSave));          
+          if (bSave) {
+            saveTrecResults(queryID, results, trecOutFile, TREC_RUN, numRet);
+          }
         }
         
-        System.out.println(String.format("Proccessed %d questions, iteration %d", questNum, iterNum));        
+        if (questNum % 1000 == 0) 
+          System.out.println(String.format("Proccessed %d questions", questNum));
+
         
-        trecOutFile.close();
-        inpDoc.close();
       }
+      
+      System.out.println(String.format("Proccessed %d questions", questNum));        
+      
+      trecOutFile.close();
+      inpDoc.close();
+
       
     } catch (ParseException e) {
       e.printStackTrace();
