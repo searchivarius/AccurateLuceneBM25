@@ -1,11 +1,13 @@
-Yahoo! Answers baseline based on Lucene
+Testing and Fixing Lucene's BM25 using Yahoo! Answers and Stack Overflow collections
 =================
 
 
 Main Prerequisites
 -----------------------
 
-1. The data set needs to be obtained [from Yahoo! Webscope](http://webscope.sandbox.yahoo.com/catalog.php?datatype=l);
+1. Data
+ 1. Yahoo Answers! data set needs to be obtained [from Yahoo! Webscope](http://webscope.sandbox.yahoo.com/catalog.php?datatype=l);
+ 2. Stack Overflow data set can be freely downloaded: [we need only posts](https://archive.org/download/stackexchange/stackoverflow.com-Posts.7z). It needs to be subsequently converted to the Yahoo Answers! format
 2. You need Java 7 and Maven;
 3. [TREC trec_eval evaluation utility](http://trec.nist.gov/trec_eval/).
 
