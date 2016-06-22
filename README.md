@@ -16,7 +16,7 @@ Indexing
 
 To see the indexing options, type:
 ```
-run/lucene_index.sh
+scripts/lucene_index.sh
 ```
 In addition to an input file (can be gzipped or bzipped2). You will have to specify the output directory to store a *Lucene* index, an output file to store TREC-style QREL files.
 
@@ -26,11 +26,11 @@ Testing
 
 To see querying options, type:
 ```
-run/lucene_query.sh
+scripts/lucene_query.sh
 ```
 It is possible to evaluate all questions, as well as randomly select a subset of questions. It is also possible to limit the number of query to execute. A sample invocation of lucene_query.sh:
 ```
-run/lucene_query.sh -d ~/lucene/yahoo_answers_baseline/ -i /home/leo/TextCollect/YahooAnswers/Manner/manner-v2.0/manner.xml.bz2 -n 15 -o eval/out -prob 0.01 -bm25_k1 0.6 -bm25_b 0.25 -max_query_qty 10000 -s data/stopwords.txt
+scripts/lucene_query.sh -d ~/lucene/yahoo_answers_baseline/ -i /home/leo/TextCollect/YahooAnswers/Manner/manner-v2.0/manner.xml.bz2 -n 15 -o eval/out -prob 0.01 -bm25_k1 0.6 -bm25_b 0.25 -max_query_qty 10000 -s data/stopwords.txt
 ```
 Note the **stopword** file!
 
