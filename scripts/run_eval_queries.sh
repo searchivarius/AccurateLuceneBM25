@@ -106,7 +106,7 @@ for type in standard fixed ; do
   fi
   for ((i=0;i<$REP_QTY;i++)) ; do
     echo "Query iteration $(($i+1))"
-    scripts/lucene_query.sh -s data/stopwords.txt -i "$input" -d "$INDEX_DIR" -prob 1.0 -n $N -max_query_qty "$max_query_qty" -o "$OUT_FILE" $flag 2>&1 >> tee ${LOG_FILE}
+    scripts/lucene_query.sh -s data/stopwords.txt -i "$input" -d "$INDEX_DIR" -prob 1.0 -n $N -max_query_qty "$max_query_qty" -o "$OUT_FILE" $flag 2>&1 >> ${LOG_FILE}
 
     if [ "$?" != "0" ] ; then
       echo "lucene_query.sh failed!"
