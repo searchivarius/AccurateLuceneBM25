@@ -36,4 +36,8 @@ public class UtilConst {
    */
   public static final boolean DO_XML_CLEANUP = true;
 
+  public static final float BM25_K1_DEFAULT= 1.2f;
+      
+  public static final float BM25_B_DEFAULT = 0.75f;
+      
 }

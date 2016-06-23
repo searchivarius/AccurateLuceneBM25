@@ -129,7 +129,7 @@ public class LuceneQuery {
       
       System.out.println("Sample the following fraction of questions: " + fProb);
       
-      float bm25_k1 = 1.2f, bm25_b = 0.75f;
+      float bm25_k1 = UtilConst.BM25_K1_DEFAULT, bm25_b = UtilConst.BM25_B_DEFAULT;
       
       if (cmd.hasOption("bm25_k1")) {
         try {
@@ -165,10 +165,10 @@ public class LuceneQuery {
       Similarity        similarity = null;
       
       if (useFixedBM25) {
-        System.out.println("Using fixed BM25Simlarity!");
+        System.out.println(String.format("Using fixed BM25Simlarity, k1=%f b=%f", bm25_k1, bm25_b));
         similarity = new BM25SimilarityFix(bm25_k1, bm25_b);
       } else {
-        System.out.println("Using Lucene BM25Similarity");
+        System.out.println(String.format("Using Lucene BM25Similarity, k1=%f b=%f", bm25_k1, bm25_b));
         similarity = new BM25Similarity(bm25_k1, bm25_b);
       }
       
@@ -191,6 +191,8 @@ public class LuceneQuery {
         qrels = new QrelReader(qrelFile);
       }      
       
+      System.out.println(String.format("Using indexing directory %s", indexDir));
+      
       LuceneCandidateProvider candProvider = new LuceneCandidateProvider(indexDir, analyzer, similarity);
       TextCleaner             textCleaner = new TextCleaner(stopWords);
       
@@ -203,28 +205,23 @@ public class LuceneQuery {
       BufferedWriter trecOutFile = 
           new BufferedWriter(new FileWriter(new File(trecOutFileName)));
       
-      int questNum = 0;
+      int questNum = 0, questQty = 0;
       
       long totalTimeMS = 0;
       
       while (inpDoc.hasNext()) {
-        if (questNum >= maxQueryQty) break;
+        if (questQty >= maxQueryQty) break;
         ++questNum;
         
         ParsedQuestion  quest = inpDoc.next();
         String queryID = quest.mQuestUri;
         
         if (randGen.nextDouble() <= fProb) {
+          ++questQty;
           // Using both the question and the content (i.e., detail field)
           String rawQuest = quest.mQuestion + " " + quest.mQuestDetail;
           String tokQuery = textCleaner.cleanUp(rawQuest);
-          String query = TextCleaner.luceneSafeCleanUp(tokQuery).trim();
-          
-//            System.out.println("=====================");
-//            System.out.println(rawQuest);
-//            System.out.println("=====================");
-//            System.out.println(query);
-//            System.out.println("#####################");            
+          String query = TextCleaner.luceneSafeCleanUp(tokQuery).trim();            
           
           ResEntry [] results = null;
           
@@ -244,8 +241,8 @@ public class LuceneQuery {
               long searchTimeMS = end - start;
               totalTimeMS += searchTimeMS;
               
-              System.out.println(String.format("Obtained results for the query # %d, the search took %d ms, we asked for max %d entries got %d", 
-                                 questNum, searchTimeMS, numRet, results.length));
+              System.out.println(String.format("Obtained results for the query # %d (answered %d queries), queryID %s the search took %d ms, we asked for max %d entries got %d", 
+                                 questNum, questQty, queryID, searchTimeMS, numRet, results.length));
 
               
             } catch (ParseException e) {
@@ -283,7 +280,7 @@ public class LuceneQuery {
         
       }
       
-      System.out.println(String.format("Proccessed %d questions, the search took %f MS on average", questNum, (float)totalTimeMS/questNum));        
+      System.out.println(String.format("Proccessed %d questions, the search took %f MS on average", questQty, (float)totalTimeMS/questQty));        
       
       trecOutFile.close();
       inpDoc.close();

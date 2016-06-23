@@ -53,6 +53,9 @@ public class LuceneIndexer {
     options.addOption("i", 			null, true, "input file");
     options.addOption("o", 			null, true, "output directory");
     options.addOption("r", 			null, true, "output TREC-format QREL file");
+    
+    options.addOption("bm25_b",     null, true, "BM25 parameter: b");
+    options.addOption("bm25_k1",    null, true, "BM25 parameter: k1");
     options.addOption("bm25fixed", 	null, false, "use the fixed BM25 similarity");
     
     // If you increase this value, you may need to modify the following line in *.sh file
@@ -60,6 +63,12 @@ public class LuceneIndexer {
     double ramBufferSizeMB = 1024 * 8; // 8 GB
     
     CommandLineParser parser = new org.apache.commons.cli.GnuParser();
+    
+    IndexWriter       indexWriter = null;
+    BufferedWriter    qrelWriter = null;
+    
+    int answNum = 0;
+    int questNum = 0;
     
     try {
       CommandLine cmd = parser.parse(options, args);
@@ -84,7 +93,7 @@ public class LuceneIndexer {
         Usage("Specify 'TREC-format QREL file'", options);
       }      
       
-      BufferedWriter qrelWriter = new BufferedWriter(new FileWriter(qrelFileName));
+      qrelWriter = new BufferedWriter(new FileWriter(qrelFileName));
       
       File outputDir = new File(outputDirName);
       if (!outputDir.exists()) {
@@ -103,6 +112,24 @@ public class LuceneIndexer {
       }
       
       boolean useFixedBM25 = cmd.hasOption("bm25fixed");
+      
+      float bm25_k1 = UtilConst.BM25_K1_DEFAULT, bm25_b = UtilConst.BM25_B_DEFAULT;
+      
+      if (cmd.hasOption("bm25_k1")) {
+        try {
+          bm25_k1 = Float.parseFloat(cmd.getOptionValue("bm25_k1"));
+        } catch (NumberFormatException e) {
+          Usage("Wrong format for 'bm25_k1'", options);
+        }
+      }
+      
+      if (cmd.hasOption("bm25_b")) {
+        try {
+          bm25_b = Float.parseFloat(cmd.getOptionValue("bm25_b"));
+        } catch (NumberFormatException e) {
+          Usage("Wrong format for 'bm25_b'", options);
+        }
+      }        
 
       EnglishAnalyzer   analyzer = new EnglishAnalyzer();
       FSDirectory       indexDir    = FSDirectory.open(Paths.get(outputDirName));
@@ -111,23 +138,23 @@ public class LuceneIndexer {
       indexConf.setOpenMode(OpenMode.CREATE); // Overwrite the 
       indexConf.setRAMBufferSizeMB(ramBufferSizeMB);
       
+      System.out.println(String.format("BM25 parameters k1=%f b=%f ", bm25_k1, bm25_b));
+      
       if (useFixedBM25) {
-        System.out.println("Using fixed BM25Simlarity!");
-        indexConf.setSimilarity(new BM25SimilarityFix());
+        System.out.println(String.format("Using fixed BM25Simlarity, k1=%f b=%f", bm25_k1, bm25_b));
+        indexConf.setSimilarity(new BM25SimilarityFix(bm25_k1, bm25_b));
       } else {
-        System.out.println("Using Lucene BM25Similarity");
-        indexConf.setSimilarity(new BM25Similarity());
+        System.out.println(String.format("Using Lucene BM25Similarity, k1=%f b=%f", bm25_k1, bm25_b));
+        indexConf.setSimilarity(new BM25Similarity(bm25_k1, bm25_b));
       }
       
-      IndexWriter       indexWriter = new IndexWriter(indexDir, indexConf);
+      indexWriter = new IndexWriter(indexDir, indexConf);
       
       YahooAnswersStreamParser inpDoc = new YahooAnswersStreamParser(inputFileName,
                                                                      UtilConst.DO_XML_CLEANUP
                                                                      );
       TextCleaner              textCleaner = new TextCleaner(null);
       
-      int answNum = 0;
-      int questNum = 0;
       while (inpDoc.hasNext()) {
         ++questNum;
         
@@ -160,17 +187,23 @@ public class LuceneIndexer {
 
       }
       
-      System.out.println(String.format("Indexed %d questions (%d answers)", questNum, answNum));
-      
-      indexWriter.close();
-      qrelWriter.close();
     } catch (ParseException e) {
       e.printStackTrace(); 	
       Usage("Cannot parse arguments" + e, options);
     } catch(Exception e) {
       System.err.println("Terminating due to an exception: " + e);
       System.exit(1);
-    }     
+    } finally {
+      System.out.println(String.format("Indexed %d questions (%d answers)", questNum, answNum));
+      
+      try {
+        if (null != indexWriter) indexWriter.close();
+        if (null != qrelWriter) qrelWriter.close();
+      } catch (IOException e) {
+        System.err.println("IO exception: " + e);
+        e.printStackTrace();
+      }
+    }
   }
 
   protected static final String NL = System.getProperty("line.separator");

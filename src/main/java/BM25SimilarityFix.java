@@ -200,25 +200,44 @@ public class BM25SimilarityFix extends Similarity {
     private final BM25StatsFixed stats;
     private final float weightValue; // boost * idf * (k1 + 1)
     private final NumericDocValues norms;
-    private final float multBKInvAvgdl;
-    private final float multK1mB;
+    private final float multK1_b_InvAvgdl;
+    private final float multK1minusB;
     ;
     
     BM25DocScorer(BM25StatsFixed stats, NumericDocValues norms) throws IOException {
       this.stats = stats;
       this.weightValue = stats.weight * (k1 + 1);
-      this.multK1mB = stats.multK1mB;
-      this.multBKInvAvgdl = stats.multBKInvAvgdl;
-      
-      this.norms = norms;
+      this.multK1minusB = stats.multK1minusB;
+      if (norms != null) {
+        this.multK1_b_InvAvgdl = stats.multK1_b_InvAvgdl;
+        this.norms = norms;
+      } else {
+        /*
+         *  This is equivalent to setting b to 0 (which mimics behavior of the old BM25 implementation):
+         *  Because the norm function below will aways return 1,
+         *  the value of the variable denom in the function score below
+         *  would be:
+         *  k1*(1-b) + k1*b*1 = k1 - b*k1 + k1*b = k1
+         *  
+         */
+        this.multK1_b_InvAvgdl = k1 * b;
+        this.norms =  
+                     new NumericDocValues () {
+                       @Override
+                       public long get(int docID) {
+                         return 1;
+                       }        
+                     };
+      }
     }
     
     @Override
     public float score(int doc, float freq) {
-      // if there are no norms, we act as if b=0
-      float norm = norms == null ? k1 : (this.multK1mB + this.multBKInvAvgdl * norms.get(doc));
-      return weightValue * freq / (freq + norm);
-    }
+      float wf = this.weightValue * freq;
+      float denom = this.multK1minusB + freq;
+      denom += this.multK1_b_InvAvgdl * norms.get(doc);
+      return wf / denom;
+    }   
     
     @Override
     public Explanation explain(int doc, Explanation freq) {
@@ -249,18 +268,18 @@ public class BM25SimilarityFix extends Similarity {
     /** field name, for pulling norms */
     private final String field;
     /** precomputed k1 * ((1 - b) */
-    private final float multK1mB;
+    private final float multK1minusB;
     /** precomputed k1 * b/avgdl. */
-    private final float multBKInvAvgdl;
+    private final float multK1_b_InvAvgdl;
 
 
     BM25StatsFixed(String field, float k1, float b, Explanation idf, float avgdl) {
       this.field = field;
       this.idf = idf;
       this.avgdl = avgdl;
-      this.multK1mB = k1 * (1 - b);
+      this.multK1minusB = k1 * (1 - b);
       // Normally avgdl should be >= 1, but let's use Math.max to avoid division by zero just in case
-      this.multBKInvAvgdl = k1 * b / Math.max(1e-10f, avgdl);
+      this.multK1_b_InvAvgdl = k1 * b / Math.max(1e-10f, avgdl);
       normalize(1f, 1f);
     }
 
