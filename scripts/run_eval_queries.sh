@@ -17,8 +17,8 @@ if [ "$output" = "" ] ; then
   exit 1
 fi
 
-n=$3
-if [ "$n" = "" ] ; then
+max_query_qty=$3
+if [ "$max_query_qty" = "" ] ; then
   echo "Specify the maximum number of queries (3d argument)"
   exit 1
 fi
@@ -26,6 +26,12 @@ fi
 REP_QTY=$4
 if [ "$REP_QTY" = "" ] ; then
   echo "Specify the number of times to run the Lucene pipeline (4th argument)"
+  exit 1
+fi
+
+DO_EVAL=$5
+if [ "$DO_EVAL" = "" ] ; then
+  echo "Specify the flag that switches on/off evaluation (5th argument)"
   exit 1
 fi
 
@@ -93,20 +99,46 @@ for type in standard fixed ; do
 
   OUT_FILE="$output/$type/runs/trec_run"
   LOG_FILE="log.$type"
+  echo > $LOG_FILE
+  if [ "$?" != "0" ] ; then
+    echo "Error writing to $LOG_FILE"
+    exit 1
+  fi
   for ((i=0;i<$REP_QTY;i++)) ; do
     echo "Query iteration $(($i+1))"
-    scripts/lucene_query.sh -s data/stopwords.txt -i "$input" -d "$INDEX_DIR" -prob 1.0 -n $N -max_query_qty "$n" -o "$OUT_FILE" $flag | tee ${LOG_FILE}
+    scripts/lucene_query.sh -s data/stopwords.txt -i "$input" -d "$INDEX_DIR" -prob 1.0 -n $N -max_query_qty "$max_query_qty" -o "$OUT_FILE" $flag 2>&1 >> tee ${LOG_FILE}
 
     if [ "$?" != "0" ] ; then
       echo "lucene_query.sh failed!"
       exit 1
     fi
   done
-  head -$N $QREL_FILE > $QREL_FILE_SHORT
-  if [ "$?" != "0" ] ; then
-    echo "Failed to create $QREL_FILE_SHORT"
-    exit 1
+  if [ "$DO_EVAL" = "1" ] ; then
+    echo "Let's evaluate output quality"
+    head -$max_query_qty $QREL_FILE > $QREL_FILE_SHORT
+    if [ "$?" != "0" ] ; then
+      echo "Failed to create $QREL_FILE_SHORT"
+      exit 1
+    fi
+    EVAL_REPORT_PREFIX="$output/$type/runs/eval"
+    scripts/eval_output.py "$TREC_EVAL_DIR/trec_eval" "$QREL_FILE_SHORT" "$OUT_FILE" "$EVAL_REPORT_PREFIX"
+    if [ "$?" != "0" ] ; then
+      echo "eval_output failed!"
+      exit 1
+    fi
   fi
+  
 done
+if [ "$DO_EVAL" = "1" ] ; then
+  echo "Let's now compute p-values and ratios"
+  for metr in recall "recall@10" "P@1" map ; do
+    echo "============================================="
+    echo " Evaluation metric: $metr "
+    echo "============================================="
+    EVAL_REPORT_STANDARD="$output/standard/runs/eval.$metr"
+    EVAL_REPORT_FIXED="$output/fixed/runs/eval.$metr"
+    scripts/p-val.R "$EVAL_REPORT_FIXED" "$EVAL_REPORT_STANDARD"
+  done
+fi
 
 
