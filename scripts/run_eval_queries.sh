@@ -98,7 +98,7 @@ for type in standard fixed ; do
   fi
 
   OUT_FILE="$output/$type/runs/trec_run"
-  LOG_FILE="log.$type"
+  LOG_FILE="$output/$type/query.log"
   echo > $LOG_FILE
   if [ "$?" != "0" ] ; then
     echo "Error writing to $LOG_FILE"
