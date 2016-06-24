@@ -1,4 +1,4 @@
-Fixing Lucene's BM25 (and testing it using Yahoo! Answers and Stack Overflow collections)
+Improving the effectiveness Lucene's BM25 (and testing it using Yahoo! Answers and Stack Overflow collections)
 =================
 
 
