@@ -25,18 +25,18 @@ To see the indexing options of the low-level indexing script, type:
 ```
 scripts/lucene_index.sh
 ```
-In addition to an input file (can be gzipped or bzipped2). You will have to specify the output directory to store a *Lucene* index, an output file to store TREC-style QREL files.
+In addition to an input file (which can be gzipped or bzipped2), you have to specify the output directory to store a *Lucene* index, an output file to store TREC-style QREL files.
 
 
 Testing
 -----------------------
 
-The low-level querying script is ``scripts/lucene_query.sh``. I have also implemented a wrapper ``scripts/run_eval_queries.sh`` does almost all the evaluation work (except extracting average retrieval time). The following is an example of invoking the evaluation script:
+The low-level querying script is ``scripts/lucene_query.sh``. I have also implemented a wrapper ``scripts/run_eval_queries.sh`` that does almost all the evaluation work (except extracting average retrieval time). The following is an example of invoking the evaluation script:
 ```
 scripts/run_eval_queries.sh ~/TextCollect/YahooAnswers/Comprehensive/FullOct2007.xml.bz2 exper/compr/ 1000 6 1
 ```
 We ask here to use the **first** 1000 questions. The search series is repeated 6 times. The value of the last argument tells the script to evaluate **effectiveness* as well as to compute p-values (again, you need R, Python, and C compiler for this). 
-The average retrieval times is saved to a log. It can be extracted as follows:
+The average retrieval times is saved to a log. They can be extracted as follows:
 ```
 grep 'on average' exper/compr/standard/query.log
 ```
