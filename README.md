@@ -7,7 +7,7 @@ Main Prerequisites
 
 1. Data
  1. Yahoo Answers! data set needs to be obtained [from Yahoo! Webscope](http://webscope.sandbox.yahoo.com/catalog.php?datatype=l);
- 2. Stack Overflow data set can be freely downloaded: [we need only posts](https://archive.org/download/stackexchange/stackoverflow.com-Posts.7z). It needs to be subsequently converted to the Yahoo Answers! format
+ 2. Stack Overflow data set can be freely downloaded: [we need only posts](https://archive.org/download/stackexchange/stackoverflow.com-Posts.7z). It needs to be subsequently converted to the Yahoo Answers! format using the script ``scripts/convert_stack_overflow.sh``. The converted collection that I used is [also available here](https://s3.amazonaws.com/RemoteDisk/TextCollections/StackExchange/StackOverflow/PostsNoCode2016-04-28.xml.bz2). Note that I converted without include any code (which makes the retrieval task harder).
 2. You need Java 7 and Maven;
 3. To carry out evaluations you need R, Python, and a C compiler. The evaluation script will download and compile [TREC trec_eval evaluation utility](http://trec.nist.gov/trec_eval/).
 
