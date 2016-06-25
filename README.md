@@ -1,6 +1,6 @@
-Improving the effectiveness Lucene's BM25 (and testing it using Yahoo! Answers and Stack Overflow collections)
+More accurate BM25 similarity for Lucene
 =================
-
+Improving the effectiveness Lucene's BM25 (and testing it using Yahoo! Answers and Stack Overflow collections).
 
 Main Prerequisites
 -----------------------
@@ -25,7 +25,7 @@ To see the indexing options of the low-level indexing script, type:
 ```
 scripts/lucene_index.sh
 ```
-In addition to an input file (which can be gzipped or bzipped2), you have to specify the output directory to store a *Lucene* index, an output file to store TREC-style QREL files.
+In addition to an input file (which can be gzipped or bzipped2), you have to specify the output directory to store a *Lucene* index, and an output file to store TREC-style QREL files.
 
 
 Testing
@@ -35,8 +35,8 @@ The low-level querying script is ``scripts/lucene_query.sh``. I have also implem
 ```
 scripts/run_eval_queries.sh ~/TextCollect/YahooAnswers/Comprehensive/FullOct2007.xml.bz2 exper/compr/ 1000 6 1
 ```
-We ask here to use the **first** 1000 questions. The search series is repeated 6 times. The value of the last argument tells the script to evaluate **effectiveness* as well as to compute p-values (again, you need R, Python, and C compiler for this). 
-The average retrieval times is saved to a log. They can be extracted as follows:
+We ask here to use the **first** 1000 questions. The search series is repeated 6 times. The value of the last argument tells the script to evaluate **effectiveness** as well as to compute p-values (again, you need R, Python, and C compiler for this). 
+The average retrieval times are saved to a log file. They can be extracted as follows:
 ```
 grep 'on average' exper/compr/standard/query.log
 ```
@@ -50,7 +50,7 @@ To see options of the low-level querying script, type:
 ```
 scripts/lucene_query.sh
 ```
-It is possible to evaluate all questions, as well as randomly select a subset of questions. It is also possible to limit the number of query to execute. A sample invocation of lucene_query.sh:
+It is possible to evaluate all questions, as well as randomly select a subset of questions. It is also possible to limit the number of queries to execute. A sample invocation of lucene_query.sh:
 ```
 scripts/lucene_query.sh -d ~/lucene/yahoo_answers_baseline/ -i /home/leo/TextCollect/YahooAnswers/Manner/manner-v2.0/manner.xml.bz2 -n 15 -o eval/out -prob 0.01 -bm25_k1 0.6 -bm25_b 0.25 -max_query_qty 10000 -s data/stopwords.txt
 ```
