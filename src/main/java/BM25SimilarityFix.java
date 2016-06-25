@@ -35,6 +35,8 @@ import org.apache.lucene.util.SmallFloat;
  * Susan Jones, Micheline Hancock-Beaulieu, and Mike Gatford. Okapi at TREC-3.
  * In Proceedings of the Third <b>T</b>ext <b>RE</b>trieval <b>C</b>onference (TREC 1994).
  * Gaithersburg, USA, November 1994.
+ * 
+ * This version (created by Leonid Boytsov) doesn't use a lossy one-byte approximation for the normalization factor.
  */
 public class BM25SimilarityFix extends Similarity {
   private final float k1;
