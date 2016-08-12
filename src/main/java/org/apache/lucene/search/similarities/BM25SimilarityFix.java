@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-//package org.apache.lucene.search.similarities;
+package org.apache.lucene.search.similarities;
 import org.apache.lucene.search.similarities.Similarity;
 
 import java.io.IOException;
@@ -28,7 +28,6 @@ import org.apache.lucene.search.CollectionStatistics;
 import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.TermStatistics;
 import org.apache.lucene.util.BytesRef;
-import org.apache.lucene.util.SmallFloat;
 
 /**
  * BM25 Similarity. Introduced in Stephen E. Robertson, Steve Walker,

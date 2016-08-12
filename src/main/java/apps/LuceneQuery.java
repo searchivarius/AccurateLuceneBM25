@@ -1,5 +1,5 @@
 /*
- *  Copyright 2015 Carnegie Mellon University
+ *  Copyright 2016 Carnegie Mellon University
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,13 +13,19 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package apps;
+
 import org.apache.commons.cli.*;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
-import org.apache.lucene.search.similarities.BM25Similarity;
-import org.apache.lucene.search.similarities.Similarity;
+import org.apache.lucene.search.similarities.*;
 
 import java.io.*;
 import java.util.Random;
+
+import utils.*;
+import lucene.*;
+import qrels.*;
+import source.*;
 
 /**
  * <p>A Lucene query application that reads questions from the Yahoo answers

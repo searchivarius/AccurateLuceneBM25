@@ -1,5 +1,5 @@
 /*
- *  Copyright 2015 Carnegie Mellon University
+ *  Copyright 2016 Carnegie Mellon University
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,9 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package lucene;
 import java.util.*;
 import java.io.*;
-
 import java.nio.file.Paths;
 
 import org.apache.lucene.analysis.Analyzer;
@@ -27,6 +27,9 @@ import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.FSDirectory;
 
 import com.google.common.base.Splitter;
+
+import utils.*;
+import qrels.*;
 
 public class LuceneCandidateProvider {
   /**

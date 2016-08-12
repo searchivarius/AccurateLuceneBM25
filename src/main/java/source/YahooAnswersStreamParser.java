@@ -1,5 +1,5 @@
 /*
- *  Copyright 2015 Carnegie Mellon University
+ *  Copyright 2016 Carnegie Mellon University
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,12 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package source;
 import java.util.*;
 import java.io.*;
-
 import javax.xml.stream.*;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
+
+import utils.*;
 
 /**
  * An XML-stream based iterator over Yahoo-Answers collection. Modeled

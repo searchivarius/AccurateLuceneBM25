@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
+package apps;
 import java.util.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -38,6 +38,7 @@ import org.htmlparser.util.Translate;
 import org.htmlparser.visitors.NodeVisitor;
 import org.w3c.dom.*;
 
+import utils.*;
 
 class ParsedPost {
   String mId;

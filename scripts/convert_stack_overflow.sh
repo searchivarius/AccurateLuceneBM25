@@ -15,7 +15,7 @@ ARGS=" -exclude_code -input $input -output $output"
 if [ "$max_num_rec" != "" ] ; then
   ARGS="$ARGS -n $max_num_rec"
 fi
-bash_cmd="mvn compile exec:java -Dexec.mainClass=ConvertStackOverflow -Dexec.args='$ARGS' "
+bash_cmd="mvn compile exec:java -Dexec.mainClass=apps.ConvertStackOverflow -Dexec.args='$ARGS' "
 echo $bash_cmd
 bash -c "$bash_cmd"
 if [ "$?" != "0" ] ; then

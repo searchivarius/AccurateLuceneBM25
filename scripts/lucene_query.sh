@@ -1,6 +1,6 @@
 #/bin/bash
 export MAVEN_OPTS="-Xms8192m -server"
-bash_cmd="mvn compile exec:java -Dexec.mainClass=LuceneQuery -Dexec.args='$@' "
+bash_cmd="mvn compile exec:java -Dexec.mainClass=apps.LuceneQuery -Dexec.args='$@' "
 bash -c "$bash_cmd"
 if [ "$?" != "0" ] ; then
   exit 1

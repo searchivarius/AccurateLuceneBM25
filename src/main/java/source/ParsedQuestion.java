@@ -1,5 +1,5 @@
 /*
- *  Copyright 2015 Carnegie Mellon University
+ *  Copyright 2016 Carnegie Mellon University
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package source;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.ArrayList;
@@ -31,11 +32,11 @@ import java.util.regex.Pattern;
  *
  */
 public class ParsedQuestion {
-  final String                mQuestion;
-  final String                mQuestDetail;
-  final String                mQuestUri;
-  final int                   mBestAnswId;
-  final ArrayList<String>     mAnswers;
+  public final String                mQuestion;
+  public final String                mQuestDetail;
+  public final String                mQuestUri;
+  public final int                   mBestAnswId;
+  public final ArrayList<String>     mAnswers;
   
   
   /**
@@ -48,7 +49,7 @@ public class ParsedQuestion {
    * @param bestAnsw        best answer
    * @param doCleanUp       do we do the clean up?
    */
-  ParsedQuestion(String quest, String questDetail, String questUri,
+  public ParsedQuestion(String quest, String questDetail, String questUri,
                  ArrayList<String> answers, String bestAnsw, 
                  boolean doCleanUp) {
     mQuestion    = cleanUpWrapper(doCleanUp, quest); 
