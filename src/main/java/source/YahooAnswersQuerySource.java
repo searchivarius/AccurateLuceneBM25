@@ -33,9 +33,8 @@ public class YahooAnswersQuerySource implements QuerySource {
       ParsedQuestion  quest = mSource.next();
       String          queryId = quest.mQuestUri;      
       String          rawQuest = quest.mQuestion + " " + quest.mQuestDetail;
-      String          cleanQuest = mTextCleaner.cleanUp(rawQuest);
       
-      return new QueryEntry(queryId, cleanQuest);
+      return new QueryEntry(queryId, rawQuest);
     }
     return null;
   }

@@ -167,14 +167,16 @@ public class LuceneIndexer {
       
       DocumentSource inpDocSource = SourceFactory.createDocumentSource(sourceName, inputFileName);
       DocumentEntry  inpDoc = null;
+      TextCleaner    textCleaner = new TextCleaner(null);
       
       while ((inpDoc = inpDocSource.next()) != null) {
         ++docNum;
 
         Document  luceneDoc = new Document();
+        String cleanText = textCleaner.cleanUp(inpDoc.mDocText);
         
         luceneDoc.add(new StringField(UtilConst.FIELD_ID, inpDoc.mDocId, Field.Store.YES));
-        luceneDoc.add(new TextField(UtilConst.FIELD_TEXT, inpDoc.mDocText, Field.Store.YES));
+        luceneDoc.add(new TextField(UtilConst.FIELD_TEXT, cleanText, Field.Store.YES));
                
         indexWriter.addDocument(luceneDoc);
         

@@ -37,9 +37,8 @@ public class YahooAnswersDocumentSource implements DocumentSource {
       if (quest.mBestAnswId == answId) {                  
         String    docId = quest.mQuestUri + "-" + answId;
         String    rawAnswer = quest.mAnswers.get(answId);
-        String    cleanAnswer = mTextCleaner.cleanUp(rawAnswer);
         
-        return new DocumentEntry(queryId, true, docId, cleanAnswer);
+        return new DocumentEntry(queryId, true, docId, rawAnswer);
       }
       /*
        *  quite infrequently, the best answer is missing.
@@ -52,5 +51,4 @@ public class YahooAnswersDocumentSource implements DocumentSource {
   }
 
   YahooAnswersStreamParser  mSource;
-  TextCleaner               mTextCleaner = new TextCleaner(null);
 }
