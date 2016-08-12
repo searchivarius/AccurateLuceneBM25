@@ -19,6 +19,8 @@ import org.apache.commons.cli.*;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.search.similarities.*;
 
+import com.google.common.base.Joiner;
+
 import java.io.*;
 import java.util.Random;
 
@@ -71,6 +73,11 @@ public class LuceneQuery {
     options.addOption("bm25fixed",  null, false, "use the fixed BM25 similarity");
     
     options.addOption("seed",       null, true, "random seed");
+    
+    Joiner   commaJoin  = Joiner.on(',');
+    
+    options.addOption("source_type", null, true, 
+                      "query source type: " + commaJoin.join(SourceFactory.getQuerySourceList()));
 
     CommandLineParser parser = new org.apache.commons.cli.GnuParser(); 
     
@@ -102,7 +109,13 @@ public class LuceneQuery {
         String stopWordFileName = cmd.getOptionValue("s");
         stopWords = new DictNoComments(new File(stopWordFileName), true /* lowercasing */);
         System.out.println("Using the stopword file: " + stopWordFileName);
-      }      
+      }
+      
+      String sourceName = cmd.getOptionValue("source_type");
+      
+      if (sourceName == null)
+        Usage("Specify document source type", options);
+
       
       int numRet = 100;
       
@@ -203,10 +216,8 @@ public class LuceneQuery {
       TextCleaner             textCleaner = new TextCleaner(stopWords);
       
 
-      // Let's re-read
-      YahooAnswersStreamParser inpDoc = new YahooAnswersStreamParser(inputFileName,
-          UtilConst.DO_XML_CLEANUP
-          );
+      QuerySource inpQuerySource = SourceFactory.createQuerySource(sourceName, inputFileName);
+      QueryEntry  inpQuery = null;
         
       BufferedWriter trecOutFile = 
           new BufferedWriter(new FileWriter(new File(trecOutFileName)));
@@ -215,18 +226,16 @@ public class LuceneQuery {
       
       long totalTimeMS = 0;
       
-      while (inpDoc.hasNext()) {
+      while ((inpQuery = inpQuerySource.next()) != null) {
         if (questQty >= maxQueryQty) break;
         ++questNum;
-        
-        ParsedQuestion  quest = inpDoc.next();
-        String queryID = quest.mQuestUri;
+                
+        String queryID = inpQuery.mQueryId;
         
         if (randGen.nextDouble() <= fProb) {
           ++questQty;
-          // Using both the question and the content (i.e., detail field)
-          String rawQuest = quest.mQuestion + " " + quest.mQuestDetail;
-          String tokQuery = textCleaner.cleanUp(rawQuest);
+          
+          String tokQuery = textCleaner.cleanUp(inpQuery.mQueryText);
           String query = TextCleaner.luceneSafeCleanUp(tokQuery).trim();            
           
           ResEntry [] results = null;
@@ -234,7 +243,7 @@ public class LuceneQuery {
           if (query.isEmpty()) {
             results = new ResEntry[0];
             System.out.println(
-                String.format("WARNING, empty query id = '%s'", quest.mQuestUri));
+                String.format("WARNING, empty query id = '%s'", inpQuery.mQueryId));
           } else {
             
             try {
@@ -254,7 +263,7 @@ public class LuceneQuery {
             } catch (ParseException e) {
               e.printStackTrace();
               System.err.println("Error parsing query: " + query + " orig question is :" 
-                                 + rawQuest);
+                                 + inpQuery.mQueryText);
               System.exit(1);
             }
           }
@@ -289,8 +298,6 @@ public class LuceneQuery {
       System.out.println(String.format("Proccessed %d questions, the search took %f MS on average", questQty, (float)totalTimeMS/questQty));        
       
       trecOutFile.close();
-      inpDoc.close();
-
       
     } catch (ParseException e) {
       e.printStackTrace();

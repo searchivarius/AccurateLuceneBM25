@@ -22,6 +22,8 @@ import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.search.similarities.*;
 import org.apache.lucene.store.*;
 
+import com.google.common.base.Joiner;
+
 import java.nio.file.Paths;
 import java.io.*;
 
@@ -56,11 +58,16 @@ public class LuceneIndexer {
     
     options.addOption("i", 			null, true, "input file");
     options.addOption("o", 			null, true, "output directory");
-    options.addOption("r", 			null, true, "output TREC-format QREL file");
+    options.addOption("r", 			null, true, "optional output TREC-format QREL file");
     
     options.addOption("bm25_b",     null, true, "BM25 parameter: b");
     options.addOption("bm25_k1",    null, true, "BM25 parameter: k1");
     options.addOption("bm25fixed", 	null, false, "use the fixed BM25 similarity");
+    
+    Joiner   commaJoin  = Joiner.on(',');
+    
+    options.addOption("source_type", null, true, 
+                      "document source type: " + commaJoin.join(SourceFactory.getDocSourceList()));
     
     // If you increase this value, you may need to modify the following line in *.sh file
     // export MAVEN_OPTS="-Xms8192m -server"
@@ -71,8 +78,7 @@ public class LuceneIndexer {
     IndexWriter       indexWriter = null;
     BufferedWriter    qrelWriter = null;
     
-    int answNum = 0;
-    int questNum = 0;
+    int docNum = 0;
     
     try {
       CommandLine cmd = parser.parse(options, args);
@@ -96,6 +102,11 @@ public class LuceneIndexer {
       } else {
         Usage("Specify 'TREC-format QREL file'", options);
       }      
+      
+      String sourceName = cmd.getOptionValue("source_type");
+      
+      if (sourceName == null)
+        Usage("Specify document source type", options);
       
       qrelWriter = new BufferedWriter(new FileWriter(qrelFileName));
       
@@ -154,40 +165,24 @@ public class LuceneIndexer {
       
       indexWriter = new IndexWriter(indexDir, indexConf);
       
-      YahooAnswersStreamParser inpDoc = new YahooAnswersStreamParser(inputFileName,
-                                                                     UtilConst.DO_XML_CLEANUP
-                                                                     );
-      TextCleaner              textCleaner = new TextCleaner(null);
+      DocumentSource inpDocSource = SourceFactory.createDocumentSource(sourceName, inputFileName);
+      DocumentEntry  inpDoc = null;
       
-      while (inpDoc.hasNext()) {
-        ++questNum;
+      while ((inpDoc = inpDocSource.next()) != null) {
+        ++docNum;
+
+        Document  luceneDoc = new Document();
         
-        ParsedQuestion  quest = inpDoc.next();
-        
-        for (int answId = 0; answId < quest.mAnswers.size(); ++answId) 
-        if (quest.mBestAnswId == answId) {                  
-          Document  luceneDoc = new Document();
-          
-          String    id = quest.mQuestUri + "-" + answId;
-          String    rawAnswer = quest.mAnswers.get(answId);
-          String    cleanAnswer = textCleaner.cleanUp(rawAnswer);
-          
-//          System.out.println("=====================");
-//          System.out.println(rawAnswer);
-//          System.out.println("=====================");
-//          System.out.println(cleanAnswer);
-//          System.out.println("#####################");
-        
-          luceneDoc.add(new StringField(UtilConst.FIELD_ID, id, Field.Store.YES));
-          luceneDoc.add(new TextField(UtilConst.FIELD_TEXT, cleanAnswer, Field.Store.YES));
+        luceneDoc.add(new StringField(UtilConst.FIELD_ID, inpDoc.mDocId, Field.Store.YES));
+        luceneDoc.add(new TextField(UtilConst.FIELD_TEXT, inpDoc.mDocText, Field.Store.YES));
                
-          indexWriter.addDocument(luceneDoc);
-          
-          saveQrelOneEntry(qrelWriter, quest.mQuestUri, id, answId == quest.mBestAnswId ? 1:0);
-          ++answNum;
+        indexWriter.addDocument(luceneDoc);
+        
+        if (inpDoc.mIsRel != null) {
+          saveQrelOneEntry(qrelWriter, inpDoc.mQueryId, inpDoc.mDocId, inpDoc.mIsRel ? 1:0);
         }
-        if (questNum % 1000 == 0) 
-          System.out.println(String.format("Indexed %d questions (%d answers)", questNum, answNum));
+        if (docNum % 1000 == 0) 
+          System.out.println(String.format("Indexed %d documents", docNum));
 
       }
       
@@ -198,7 +193,7 @@ public class LuceneIndexer {
       System.err.println("Terminating due to an exception: " + e);
       System.exit(1);
     } finally {
-      System.out.println(String.format("Indexed %d questions (%d answers)", questNum, answNum));
+      System.out.println(String.format("Indexed %d documents", docNum));
       
       try {
         if (null != indexWriter) indexWriter.close();

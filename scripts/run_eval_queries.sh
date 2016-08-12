@@ -11,27 +11,33 @@ if [ ! -f "$input" ] ; then
   exit 1
 fi
 
-output=$2
+source_type=$2
+if [ "$source_type" = "" ] ; then
+  echo "Specify query source type, e.g., yahoo_answers"
+  exit 1
+fi
+
+output=$3
 if [ "$output" = "" ] ; then
-  echo "Specify the top-level directory for indices of two types (2d argument)"
+  echo "Specify the top-level directory for indices of two types (3d argument)"
   exit 1
 fi
 
-max_query_qty=$3
+max_query_qty=$4
 if [ "$max_query_qty" = "" ] ; then
-  echo "Specify the maximum number of queries (3d argument)"
+  echo "Specify the maximum number of queries (4th argument)"
   exit 1
 fi
 
-REP_QTY=$4
+REP_QTY=$5
 if [ "$REP_QTY" = "" ] ; then
-  echo "Specify the number of times to run the Lucene pipeline (4th argument)"
+  echo "Specify the number of times to run the Lucene pipeline (5th argument)"
   exit 1
 fi
 
-DO_EVAL=$5
+DO_EVAL=$6
 if [ "$DO_EVAL" = "" ] ; then
-  echo "Specify the flag that switches on/off evaluation (5th argument)"
+  echo "Specify the flag that switches on/off evaluation (6th argument)"
   exit 1
 fi
 
@@ -106,7 +112,7 @@ for type in standard fixed ; do
   fi
   for ((i=0;i<$REP_QTY;i++)) ; do
     echo "Query iteration $(($i+1))"
-    scripts/lucene_query.sh -s data/stopwords.txt -i "$input" -d "$INDEX_DIR" -prob 1.0 -n $N -max_query_qty "$max_query_qty" -o "$OUT_FILE" $flag 2>&1 >> ${LOG_FILE}
+    scripts/lucene_query.sh -s data/stopwords.txt -i "$input" -source_type "$source_type" -d "$INDEX_DIR" -prob 1.0 -n $N -max_query_qty "$max_query_qty" -o "$OUT_FILE" $flag 2>&1 >> ${LOG_FILE}
 
     if [ "$?" != "0" ] ; then
       echo "lucene_query.sh failed!"
