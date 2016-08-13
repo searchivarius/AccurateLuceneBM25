@@ -15,6 +15,8 @@
  */
 package source;
 
+import java.io.IOException;
+
 public interface QuerySource {
   /**
    * 
@@ -22,5 +24,5 @@ public interface QuerySource {
    * 
    */
   
-  QueryEntry next();
+  QueryEntry next() throws IOException;
 }

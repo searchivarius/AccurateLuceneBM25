@@ -33,6 +33,9 @@ public class TrecGov2Parser extends TrecDocParser {
   private static final String DATE = "Date: ";
   private static final String DATE_END = TrecContentSource.NEW_LINE;
   
+  private static final String DOCNO= "<DOCNO>";
+  private static final String TERMINATING_DOCNO = "</DOCNO>";
+  
   private static final String DOCHDR = "<DOCHDR>";
   private static final String TERMINATING_DOCHDR = "</DOCHDR>";
 
@@ -49,8 +52,8 @@ public class TrecGov2Parser extends TrecDocParser {
       
       if (hEnd2dLine >= 0) {
         String url = docBuf.substring(hStart2dLine, hEnd2dLine)
-                                      .toLowerCase().trim();
-        
+            .toLowerCase().trim();
+
         if (url.startsWith("http://") || 
             url.startsWith("ftp://") ||
             url.startsWith("https://")
@@ -61,17 +64,18 @@ public class TrecGov2Parser extends TrecDocParser {
             date = trecSrc.parseDate(dateStr);
           }
           start = h2 + TERMINATING_DOCHDR.length();
-          
+
           final String html = docBuf.substring(start);
           docData = trecSrc.getHtmlParser().parse(docData, name, date, new StringReader(html), trecSrc);
           // This should be done after parse(), b/c parse() resets properties
           docData.getProps().put("url", url);
+          docData.setName(name);
           return docData;
+        } else {
+          System.err.println("Ignoring schema in URI: " + url);  
+        }
       } else {
-        System.err.println("Ignoring schema in URI: " + url);  
-      }
-      } else {
-        System.err.println("Invalid header: " + docBuf.toString());
+        throw new RuntimeException("Invalid header: " + docBuf.toString());
       }
     }
     

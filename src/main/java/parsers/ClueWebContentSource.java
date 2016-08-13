@@ -141,11 +141,15 @@ public class ClueWebContentSource extends ContentSourceDateUtil {
         openNextFile();
         return getNextDocData(docData);
       }
-    }
-        
+    }       
  
     Date    date = parseDate(CurrRec.getHeaderMetadataItem("WARC-Date"));    
     String  url = CurrRec.getHeaderMetadataItem("WARC-Target-URI");
+    String  trecId = CurrRec.getHeaderMetadataItem("WARC-TREC-ID");
+    
+    if (null == trecId)
+      throw new RuntimeException("No WARC-TREC-ID field for url: '" + url + "'");
+      
       
     // This code segment relies on HtmlParser being thread safe. When we get 
     // here, everything else is already private to that thread, so we're safe.
@@ -159,12 +163,12 @@ public class ClueWebContentSource extends ContentSourceDateUtil {
       
       if (EndOfHead >= 0) {
         String html = Response.substring(EndOfHead + 2);
-
-        Properties props = new Properties();
                 
         docData = htmlParser.parse(docData, url, date, new StringReader(html), this);
      // This should be done after parse(), b/c parse() resets properties
         docData.getProps().put("url", url);
+        docData.setName(trecId);
+        
       } else {
         /*
          *  TODO: @leo What do we do here exactly? 
