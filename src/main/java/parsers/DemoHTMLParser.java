@@ -59,7 +59,13 @@ public class DemoHTMLParser implements HTMLParser {
     public Parser(InputSource source) throws IOException, SAXException {
       final SAXParser parser = new SAXParser();
       parser.setFeature("http://xml.org/sax/features/namespaces", true);
-      parser.setFeature("http://cyberneko.org/html/features/balance-tags", true);
+      /*
+       *  It seesm that an attempt to balance tags may cause the stack
+       *  overflow via the infinite recursion in 
+       *  org.cyberneko.html.HTMLTagBalancer.endElement 
+       */
+      //parser.setFeature("http://cyberneko.org/html/features/balance-tags", true);
+      parser.setFeature("http://cyberneko.org/html/features/balance-tags", false);
       parser.setFeature("http://cyberneko.org/html/features/report-errors", false);
       parser.setProperty("http://cyberneko.org/html/properties/names/elems", "lower");
       parser.setProperty("http://cyberneko.org/html/properties/names/attrs", "lower");

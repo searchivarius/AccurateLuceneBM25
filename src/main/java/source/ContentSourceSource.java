@@ -60,7 +60,7 @@ public class ContentSourceSource implements DocumentSource {
       mSource = new TrecContentSource();        
     } else if (typeLC.equals(SOURCE_TYPE_CLUEWEB)) {
       // parsers.DemoHTMLParser HTML parser fails on this collection
-      mProperties.setProperty("html.parser", "parsers.DemoHTMLParser");
+      mProperties.setProperty("html.parser", "parsers.LeoHTMLParser");
       mProperties.setProperty("docs.dir", indexSource);
       mProperties.setProperty("work.dir", "/tmp");
 
