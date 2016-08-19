@@ -177,10 +177,9 @@ public class LuceneIndexer {
 //        System.out.println(inpDoc.mDocId);
 //        System.out.println(cleanText);
 //        System.out.println("==============================");
-        
+
         luceneDoc.add(new StringField(UtilConst.FIELD_ID, inpDoc.mDocId, Field.Store.YES));
-        luceneDoc.add(new TextField(UtilConst.FIELD_TEXT, cleanText, Field.Store.YES));
-               
+        luceneDoc.add(new TextField(UtilConst.FIELD_TEXT, cleanText, Field.Store.YES));               
         indexWriter.addDocument(luceneDoc);
         
         if (inpDoc.mIsRel != null && qrelWriter != null) {

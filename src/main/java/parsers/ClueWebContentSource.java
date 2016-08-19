@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 
+import org.apache.commons.io.comparator.NameFileComparator;
+
 import org.apache.lucene.benchmark.byTask.feeds.ContentSource;
 import org.apache.lucene.benchmark.byTask.feeds.DocData;
 import org.apache.lucene.benchmark.byTask.feeds.NoMoreDataException;
@@ -212,8 +214,19 @@ public class ClueWebContentSource extends ContentSourceDateUtil {
     }
 
     try {
-      // files
-      collectFiles(dataDir.toPath(), inputFiles);
+      // files: accept only WARC files
+      ArrayList<Path> tmpp = new ArrayList<Path>();
+      collectFiles(dataDir.toPath(), tmpp);
+      
+      ArrayList<File> tmpf = new ArrayList<File>();
+      for (Path p : tmpp) 
+      if (p.endsWith("warc.gz")) {
+        tmpf.add(p.toFile());
+      }
+      NameFileComparator c = new NameFileComparator();
+      tmpf.sort(c);
+      for (File f : tmpf) inputFiles.add(f.toPath());
+      
       if (inputFiles.size() == 0) {
         throw new IllegalArgumentException("No files in dataDir: " + dataDir);
       }
@@ -227,6 +240,8 @@ public class ClueWebContentSource extends ContentSourceDateUtil {
       // Should not get here. Throw runtime exception.
       throw new RuntimeException(e);
     }
+    
+    verbose = true;
   }
 
 }
