@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 
-import org.apache.commons.io.comparator.NameFileComparator;
+import org.apache.commons.io.comparator.PathFileComparator;
 
 import org.apache.lucene.benchmark.byTask.feeds.ContentSource;
 import org.apache.lucene.benchmark.byTask.feeds.DocData;
@@ -220,12 +220,17 @@ public class ClueWebContentSource extends ContentSourceDateUtil {
       
       ArrayList<File> tmpf = new ArrayList<File>();
       for (Path p : tmpp) 
-      if (p.endsWith("warc.gz")) {
+      if (p.toString().endsWith("warc.gz")) {
         tmpf.add(p.toFile());
+      } else {
+        System.out.println("Ignoring file: " + p);
       }
-      NameFileComparator c = new NameFileComparator();
-      tmpf.sort(c);
-      for (File f : tmpf) inputFiles.add(f.toPath());
+
+      tmpf.sort(new PathFileComparator());
+      for (File f : tmpf) {
+        inputFiles.add(f.toPath());
+        //System.out.println(f);
+      }
       
       if (inputFiles.size() == 0) {
         throw new IllegalArgumentException("No files in dataDir: " + dataDir);
