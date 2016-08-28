@@ -35,6 +35,10 @@ public class ContentSourceSource implements DocumentSource {
     String typeLC = indexType.toUpperCase();
     mProperties = new Properties();
     
+    
+    // prevent an infinite parsing loop, which is a strange default here
+    mProperties.setProperty("content.source.forever", "false"); 
+    
     if (typeLC.equals(SOURCE_TYPE_WIKIPEDIA)) {  
       File wikipediafile = new File(indexSource);
       if (!wikipediafile.exists()) {

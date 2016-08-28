@@ -19,15 +19,19 @@ public class SourceFactory {
   }
   // Query sources
   public static String QUERY_SOURCE_YAHOO_ANSWERS = "yahoo_answers";
+  public static String QUERY_SOURCE_TREC_WEB      = "trec_web";
   
   public static QuerySource createQuerySource(String sourceName, String fileName) throws Exception {
     if (sourceName.equalsIgnoreCase(DOC_SOURCE_YAHOO_ANSWERS)) {
       return new YahooAnswersQuerySource(fileName);
     }
+    if (sourceName.equalsIgnoreCase(QUERY_SOURCE_TREC_WEB)) {
+      return new TrecWebQuerySource(fileName);
+    }
     throw new Exception("Uncrecognized query source: " + sourceName);
   }
   
   public static String [] getQuerySourceList() {
-    return new String[] { QUERY_SOURCE_YAHOO_ANSWERS };
+    return new String[] { QUERY_SOURCE_YAHOO_ANSWERS, QUERY_SOURCE_TREC_WEB };
   }
 }

@@ -1,19 +1,20 @@
 #/bin/bash
+YAHOO_ANSWERS_SOURCE="yahoo_answers"
 export MAVEN_OPTS="-Xms8192m -server"
 input=$1
 if [ "$input" = "" ] ; then
-  echo "Specify the input file as the (1st argument)"
+  echo "Specify the input query file as the (1st argument)"
   exit 1
 fi
 
 if [ ! -f "$input" ] ; then
-  echo "The specified input file '$input' cannot be found!"
+  echo "The specified input query file '$input' cannot be found!"
   exit 1
 fi
 
 source_type=$2
 if [ "$source_type" = "" ] ; then
-  echo "Specify query source type, e.g., yahoo_answers"
+  echo "Specify query source type, e.g., $YAHOO_ANSWERS_SOURCE, trec_web"
   exit 1
 fi
 
@@ -39,6 +40,18 @@ DO_EVAL=$6
 if [ "$DO_EVAL" = "" ] ; then
   echo "Specify the flag that switches on/off evaluation (6th argument)"
   exit 1
+fi
+
+if [ "$DO_EVAL" = "1" -a "$source_type" != "$YAHOO_ANSWERS_SOURCE" ] ; then
+  QREL_FILE_SHORT=$7
+  if [ "$QREL_FILE_SHORT" = "" ] ; then
+    echo "The source type is different from $YAHOO_ANSWERS_SOURCE, hence, you have specify an external qrel file (7th argument)"
+    exit 1
+  fi
+  if [ ! -f "$QREL_FILE_SHORT" ] ; then
+    echo "Cannot find file: '$QREL_FILE_SHORT'"
+    exit 1
+  fi
 fi
 
 # Retrieve 100 entries
@@ -87,13 +100,16 @@ for type in standard fixed ; do
 
   RUN_DIR=
 
-  QREL_FILE="$output/$type/runs/qrels.txt"
-  QREL_FILE_SHORT="$output/$type/runs/qrels_short.txt"
+  if [ "$source_type" = "$YAHOO_ANSWERS_SOURCE" ] ; then
+    QREL_FILE="$output/$type/runs/qrels.txt"
+    QREL_FILE_SHORT="$output/$type/runs/qrels_short.txt"
 
-  if [ ! -f "$QREL_FILE" ] ; then
-    echo "There is no qrels.txt file in the directory $INDEX_DIR did the indexing procedure finish properly?"
-    exit 1
+    if [ ! -f "$QREL_FILE" ] ; then
+      echo "There is no qrels.txt file in the directory $INDEX_DIR did the indexing procedure finish properly?"
+      exit 1
+    fi
   fi
+
 
   flag=""
   if [ "$type" = "standard" ] ; then
@@ -121,10 +137,15 @@ for type in standard fixed ; do
   done
   if [ "$DO_EVAL" = "1" ] ; then
     echo "Let's evaluate output quality"
-    head -$max_query_qty $QREL_FILE > $QREL_FILE_SHORT
-    if [ "$?" != "0" ] ; then
-      echo "Failed to create $QREL_FILE_SHORT"
-      exit 1
+    if [ "$source_type" = "$YAHOO_ANSWERS_SOURCE" ] ; then
+      # For Yahoo Answers's type of source queries
+      # the qrel file will be huge, so we need to truncate it
+      # to make evaluation feasible
+      head -$max_query_qty $QREL_FILE > $QREL_FILE_SHORT
+      if [ "$?" != "0" ] ; then
+        echo "Failed to create $QREL_FILE_SHORT"
+        exit 1
+      fi
     fi
     EVAL_REPORT_PREFIX="$output/$type/runs/eval"
     scripts/eval_output.py "$TREC_EVAL_DIR/trec_eval" "$QREL_FILE_SHORT" "$OUT_FILE" "$EVAL_REPORT_PREFIX"
