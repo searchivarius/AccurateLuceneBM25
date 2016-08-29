@@ -159,12 +159,20 @@ public class ClueWebContentSource extends ContentSourceDateUtil {
         url.startsWith("ftp://") ||
         url.startsWith("https://")
         ) {          
-      String Response = CurrRec.getContentUTF8();
+      // In ClueWeb09, the HTTP response was incorrectly terminated by \n\n instead of \r\n\r\n
+      // as requested by the standard 
+      // So, to make all ClueWeb12 documents parseable with the old approach, we replace the first
+      // \r\n\r\n with \n\n and will proceed as if we have ClueWeb09
+      String Response = CurrRec.getContentUTF8().replaceFirst("\r\n\r\n", "\n\n");
 
       int EndOfHead = Response.indexOf("\n\n");
+
       
       if (EndOfHead >= 0) {
         String html = Response.substring(EndOfHead + 2);
+        
+        //System.out.println(html);
+        //System.out.println("====================");
                 
         docData = htmlParser.parse(docData, url, date, new StringReader(html), this);
      // This should be done after parse(), b/c parse() resets properties
@@ -229,7 +237,7 @@ public class ClueWebContentSource extends ContentSourceDateUtil {
       tmpf.sort(new PathFileComparator());
       for (File f : tmpf) {
         inputFiles.add(f.toPath());
-        //System.out.println(f);
+        System.out.println(f);
       }
       
       if (inputFiles.size() == 0) {
