@@ -1,0 +1,2 @@
+This directory contains 500 queries and respective relevance judgements from CueWeb09 One-Million Query Track downloaded from the [TREC NIST page](http://trec.nist.gov/data/million.query09.html).
+Because relevance judgments are dense only for a few hundreds of queries, we use only the first 500. Also note that relevance judgements in the qrel-format are obtained from prel-format judgements using the script [convert_prel.py](../scripts/convert_prel.py).
