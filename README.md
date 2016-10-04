@@ -36,7 +36,7 @@ scripts/lucene_index.sh
 In addition to an input file (which can be gzipped or bzipped2), you have to specify the output directory to store a *Lucene* index, and an output file to store TREC-style QREL files.
 
 
-Testing
+Testing with community QA data sets
 -----------------------
 
 The low-level querying script is ``scripts/lucene_query.sh``, but I strongly recommend to use a wrapper ``scripts/run_eval_queries.sh`` that does almost all the evaluation work (except extracting average retrieval time). The following is an example of invoking the evaluation script:
@@ -59,6 +59,22 @@ To retrieve the list of timings for every run as a space-separated sequence, you
 grep 'on average' exper/compr/standard/query.log |awk '{printf("%s%s",t,$7);t=" "}END{print ""}'
 ```
 **Note** that ``exper/compr`` in these examples should be replaced with your own top-level directory that you pass to the script ``scripts/create_indices.sh``.
+
+Testing with ClueWeb09/12 data sets
+-----------------------
+One should still use the script ``scripts/lucene_query.sh``. However, an additional arguments: relevance judgements (the so-called QREL files) should be specified. For ClueWeb09 data, I put both judgements and queries to this repo. Therefore, one can run evaluations as follows (don't forget to specify your own directories with ClueWeb09/12 indices):
+```
+scripts/run_eval_queries.sh eval_data/clueweb09_1MQ/queries_1MQ.txt trec_web indices/clueweb09 10000 1 1 eval_data/clueweb09_1MQ/qrels_1MQ.txt
+```
+For ClueWeb12 data sets, query files and QREL-files need to be generated. To do this, you first need to download and uncompress [UQV100 files](https://figshare.com/articles/_/3180694). Then, you can generate QREL-files and queries, e.g., as follows:
+```
+eval_data/uqv100/merge_uqv100.py  ~/TextCollect/uqv100/ eval_data/uqv100/uqv100_mult_queries.txt eval_data/uqv100/uqv100_mult_qrels.txt
+```
+Finally, you can use generated QREL and queries to run evaluation:
+```
+scripts/run_eval_queries.sh eval_data/uqv100/uqv100_mult_queries.txt trec_web indices/clueweb12/ 10000 1 1 eval_data/uqv100/uqv100_mult_qrels.txt 
+```
+
 
 
 Expert querying
