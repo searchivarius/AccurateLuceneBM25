@@ -15,7 +15,7 @@ Main Prerequisites
 Indexing
 -----------------------
 
-The low-level indexing script is ``scripts/lucene_index.sh``. I have also implemented a wrapper script that I recommend using instead. To create indices and auxilliary files in subdirectories ``exper/compr`` (for Yahoo Answers! Comprehensive) and ``exper/stack`` (for Stack Oveflow), I used the following commands (you will need to specify location of input/output files on **your own computer**, which is the first argument of ``scripts/create_indices``):
+The low-level indexing script is ``scripts/lucene_index.sh``. I have also implemented a wrapper script that I recommend using instead. To create indices and auxilliary files in subdirectories ``exper/compr`` (for Yahoo Answers! Comprehensive) and ``exper/stack`` (for Stack Oveflow), I used the following commands (you will need to specify location of input/output files on **your own computer**):
 ```
 scripts/create_indices.sh ~/TextCollect/StackOverflow/PostsNoCode2016-04-28.xml.bz2 exper/stack yahoo_answers
 scripts/create_indices.sh ~/TextCollect/YahooAnswers/Comprehensive/FullOct2007.xml.bz2 exper/compr yahoo_answers
@@ -33,7 +33,7 @@ To see the indexing options of the low-level indexing script, type:
 ```
 scripts/lucene_index.sh
 ```
-In addition to an input file (which can be gzipped or bzipped2), you have to specify the output directory to store a *Lucene* index, and an output file to store TREC-style QREL files.
+In addition to an input file (which can be gzipped or bzipped2), you have to specify the output directory to store a *Lucene* index. For community QA data you can specify the location of an output file to store TREC-style QREL files.
 
 
 Testing with community QA data sets
@@ -62,9 +62,9 @@ grep 'on average' exper/compr/standard/query.log |awk '{printf("%s%s",t,$7);t=" 
 
 Testing with ClueWeb09/12 data sets
 -----------------------
-One should still use the script ``scripts/lucene_query.sh``. However, an additional arguments: relevance judgements (the so-called QREL files) should be specified. For ClueWeb09 data, I put both judgements and queries to this repo. Therefore, one can run evaluations as follows (don't forget to specify your own directories with ClueWeb09/12 indices):
+Again, please, use the script ``scripts/lucene_query.sh``. However, an additional arguments: relevance judgements (the so-called QREL files) should be specified. For ClueWeb09 data, I have placed both judgements (QREL-files) and queries to this repo. Therefore, one can run evaluations as follows (don't forget to specify your own directories with ClueWeb09/12 indices instead of ``exper/clueweb09``):
 ```
-scripts/run_eval_queries.sh eval_data/clueweb09_1MQ/queries_1MQ.txt trec_web indices/clueweb09 10000 1 1 eval_data/clueweb09_1MQ/qrels_1MQ.txt
+scripts/run_eval_queries.sh eval_data/clueweb09_1MQ/queries_1MQ.txt trec_web exper/clueweb09 10000 1 1 eval_data/clueweb09_1MQ/qrels_1MQ.txt
 ```
 For ClueWeb12 data sets, query files and QREL-files need to be generated. To do this, you first need to download and uncompress [UQV100 files](https://figshare.com/articles/_/3180694). Then, you can generate QREL-files and queries, e.g., as follows:
 ```
@@ -72,10 +72,8 @@ eval_data/uqv100/merge_uqv100.py  ~/TextCollect/uqv100/ eval_data/uqv100/uqv100_
 ```
 Finally, you can use generated QREL and queries to run evaluation:
 ```
-scripts/run_eval_queries.sh eval_data/uqv100/uqv100_mult_queries.txt trec_web indices/clueweb12/ 10000 1 1 eval_data/uqv100/uqv100_mult_qrels.txt 
+scripts/run_eval_queries.sh eval_data/uqv100/uqv100_mult_queries.txt trec_web exper/clueweb12/ 10000 1 1 eval_data/uqv100/uqv100_mult_qrels.txt 
 ```
-
-
 
 Expert querying
 -----------------------
