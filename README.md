@@ -1,6 +1,6 @@
 More accurate BM25 similarity for Lucene
 =================
-Improving the effectiveness Lucene's BM25 (and testing it using community QA and ClueWeb* collections). Please, see [my blog post for details](http://searchivarius.org/blog/accurate-bm25-similarity-lucene).
+Improving the effectiveness Lucene's BM25 (and testing it using community QA and ClueWeb* collections). Please, see [my blog post for details](http://searchivarius.org/blog/accurate-bm25-similarity-lucene-follow).
 
 Main Prerequisites
 -----------------------
