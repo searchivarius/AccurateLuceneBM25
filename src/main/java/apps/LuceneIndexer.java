@@ -46,6 +46,7 @@ import source.*;
  */
 
 public class LuceneIndexer {
+  public static final int MAX_GRADE = 4; // to be compatible with gdeval.pl
   static void Usage(String err, Options opt) {
     System.err.println("Error: " + err);
     HelpFormatter formatter = new HelpFormatter();
@@ -149,7 +150,11 @@ public class LuceneIndexer {
       FSDirectory       indexDir    = FSDirectory.open(Paths.get(outputDirName));
       IndexWriterConfig indexConf   = new IndexWriterConfig(analyzer);
       
-      indexConf.setOpenMode(OpenMode.CREATE); // Overwrite the 
+      /*
+          OpenMode.CREATE creates a new index or overwrites an existing one.
+          https://lucene.apache.org/core/6_0_0/core/org/apache/lucene/index/IndexWriterConfig.OpenMode.html#CREATE
+      */
+      indexConf.setOpenMode(OpenMode.CREATE); 
       indexConf.setRAMBufferSizeMB(ramBufferSizeMB);
       
       System.out.println(String.format("BM25 parameters k1=%f b=%f ", bm25_k1, bm25_b));
@@ -183,7 +188,7 @@ public class LuceneIndexer {
         indexWriter.addDocument(luceneDoc);
         
         if (inpDoc.mIsRel != null && qrelWriter != null) {
-          saveQrelOneEntry(qrelWriter, inpDoc.mQueryId, inpDoc.mDocId, inpDoc.mIsRel ? 1:0);
+          saveQrelOneEntry(qrelWriter, inpDoc.mQueryId, inpDoc.mDocId, inpDoc.mIsRel ? MAX_GRADE:0);
         }
         if (docNum % 1000 == 0) 
           System.out.println(String.format("Indexed %d documents", docNum));
