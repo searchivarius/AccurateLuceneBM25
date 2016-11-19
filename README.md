@@ -1,6 +1,6 @@
 More accurate BM25 similarity for Lucene
 =================
-Improving the effectiveness Lucene's BM25 (and testing it using community QA and ClueWeb* collections). Please, see [my blog post for details](http://searchivarius.org/blog/accurate-bm25-similarity-lucene-follow).
+Improving the effectiveness Lucene's BM25 (and testing it using community QA and ClueWeb* collections). Please, see [my blog post for details](http://searchivarius.org/blog/accurate-bm25-similarity-lucene-follow). It works for early version of Lucene 6.x, e.g., 6.0. However, the later Lucene versions (I think starting from 6.3) changed internal API, so this similarity class will not work without changes.
 
 Main Prerequisites
 -----------------------
