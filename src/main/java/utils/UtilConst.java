@@ -24,6 +24,10 @@ public class UtilConst {
    */
   public static final String FIELD_TEXT = "TEXT";
   
+  public static final String XML_FIELD_DOCNO = "DOCNO";
+  
+  public static final String XML_FIELD_TEXT ="Text_bm25";
+  
   /**
    * True, if we lemmatize text during indexing AND retrieval. 
    */
