@@ -20,6 +20,7 @@ import com.google.common.base.Joiner;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.*;
 
 import utils.*;
 import source.*;
@@ -42,7 +43,14 @@ public class Source2XML {
     HelpFormatter formatter = new HelpFormatter();
     formatter.printHelp("Source2XML", opt);      
     System.exit(1);
-  } 
+  }
+  
+  static final Pattern mSomePunctPattern = Pattern.compile("[\\[\\]|+\\-#@\\^&~`\\\\]");
+  
+  public static String replaceSomePunct(String s) {    
+    Matcher m = mSomePunctPattern.matcher(s);
+    return m.replaceAll(" ");
+  }
   
   public static void main(String [] args) {
     Options options = new Options();
@@ -94,20 +102,33 @@ public class Source2XML {
 
       outputMap.put(UtilConst.XML_FIELD_DOCNO, null);
       outputMap.put(UtilConst.XML_FIELD_TEXT, null);
-
       
       XmlHelper xmlHlp = new XmlHelper();
       
       while ((inpDoc = inpDocSource.next()) != null) {
         ++docNum;
 
-        String cleanText = textCleaner.cleanUp(inpDoc.mDocText);
+        String partlyCleanedText = textCleaner.cleanUp(inpDoc.mDocText);
+        String cleanText = XmlHelper.removeInvaildXMLChars(partlyCleanedText); 
+        cleanText = replaceSomePunct(cleanText);
         
         outputMap.replace(UtilConst.XML_FIELD_DOCNO, inpDoc.mDocId);
-        outputMap.replace(UtilConst.XML_FIELD_TEXT, cleanText);
+        outputMap.replace(UtilConst.XML_FIELD_TEXT,  cleanText);
+
+        String xml = xmlHlp.genXMLIndexEntry(outputMap);
+        
+        /*
+        {
+          System.out.println(inpDoc.mDocId);
+          System.out.println("=====================");
+          System.out.println(partlyCleanedText);
+          System.out.println("=====================");
+          System.out.println(cleanText);
+        } 
+        */               
         
         try {
-          outputFile.write(xmlHlp.genXMLIndexEntry(outputMap));
+          outputFile.write(xml);
           outputFile.write(NL);
         } catch (Exception e) {
           e.printStackTrace();
