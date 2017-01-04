@@ -286,7 +286,7 @@ public class TrecContentSource extends ContentSourceDateUtil {
       encoding = "ISO-8859-1";
     }
     // iteration exclusion in doc name 
-    excludeDocnameIteration = config.get("content.source.excludeIteration", false);
+    excludeDocnameIteration = config.get("content.source.excludeIteration", true);
   }
 
 }
