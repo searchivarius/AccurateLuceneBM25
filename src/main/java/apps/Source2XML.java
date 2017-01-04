@@ -45,7 +45,7 @@ public class Source2XML {
     System.exit(1);
   }
   
-  static final Pattern mSomePunctPattern = Pattern.compile("[\\[\\]|+\\-#@\\^&~`\\\\]");
+  static final Pattern mSomePunctPattern = Pattern.compile("[\\[\\]|+\\-#@\\^&~`\\\\]\\{\\}*");
   
   public static String replaceSomePunct(String s) {    
     Matcher m = mSomePunctPattern.matcher(s);
@@ -57,6 +57,7 @@ public class Source2XML {
     
     options.addOption("i", 			null, true, "input file");
     options.addOption("o", 			null, true, "output file");
+    options.addOption("reparse_xml", null, false, "reparse each XML entry to ensure the parser doesn't fail");
     
     Joiner   commaJoin  = Joiner.on(',');
     
@@ -92,6 +93,8 @@ public class Source2XML {
       
       if (sourceName == null)
         Usage("Specify document source type", options);
+      
+      boolean reparseXML = options.hasOption("reparse_xml");
 
       
       DocumentSource inpDocSource = SourceFactory.createDocumentSource(sourceName, inputFileName);
@@ -105,6 +108,9 @@ public class Source2XML {
       
       XmlHelper xmlHlp = new XmlHelper();
       
+      if (reparseXML) 
+        System.out.println("Will reparse every XML entry to verify correctness!");
+      
       while ((inpDoc = inpDocSource.next()) != null) {
         ++docNum;
 
@@ -116,6 +122,15 @@ public class Source2XML {
         outputMap.replace(UtilConst.XML_FIELD_TEXT,  cleanText);
 
         String xml = xmlHlp.genXMLIndexEntry(outputMap);
+        
+        if (reparseXML) {
+          try {
+            XmlHelper.parseDocWithoutXMLDecl(xml);
+          } catch (Exception e) {
+            System.err.println("Error re-parsing xml for document ID: " + inpDoc.mDocId);
+            System.exit(1);
+          }
+        }
         
         /*
         {
