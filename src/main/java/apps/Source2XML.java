@@ -106,8 +106,13 @@ public class Source2XML {
         outputMap.replace(UtilConst.XML_FIELD_DOCNO, inpDoc.mDocId);
         outputMap.replace(UtilConst.XML_FIELD_TEXT, cleanText);
         
-        outputFile.write(xmlHlp.genXMLIndexEntry(outputMap));
-        outputFile.write(NL);
+        try {
+          outputFile.write(xmlHlp.genXMLIndexEntry(outputMap));
+          outputFile.write(NL);
+        } catch (Exception e) {
+          e.printStackTrace();
+          System.err.println("Error processing/saving a document!");
+        }
         
         if (docNum % 1000 == 0) 
           System.out.println(String.format("Processed %d documents", docNum));
