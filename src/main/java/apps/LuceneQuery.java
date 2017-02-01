@@ -75,6 +75,7 @@ public class LuceneQuery {
     options.addOption("seed",       null, true, "random seed");
     
     Joiner   commaJoin  = Joiner.on(',');
+    Joiner   spaceJoin  = Joiner.on(' ');
     
     options.addOption("source_type", null, true, 
                       "query source type: " + commaJoin.join(SourceFactory.getQuerySourceList()));
@@ -235,7 +236,7 @@ public class LuceneQuery {
         if (randGen.nextDouble() <= fProb) {
           ++questQty;
           
-          String tokQuery = textCleaner.cleanUp(inpQuery.mQueryText);
+          String tokQuery = spaceJoin.join(textCleaner.cleanUp(inpQuery.mQueryText));
           String query = TextCleaner.luceneSafeCleanUp(tokQuery).trim();            
           
           ResEntry [] results = null;

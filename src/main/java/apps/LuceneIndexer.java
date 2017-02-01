@@ -25,6 +25,7 @@ import org.apache.lucene.store.*;
 import com.google.common.base.Joiner;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.io.*;
 
 import utils.*;
@@ -66,6 +67,7 @@ public class LuceneIndexer {
     options.addOption("bm25fixed", 	null, false, "use the fixed BM25 similarity");
     
     Joiner   commaJoin  = Joiner.on(',');
+    Joiner   spaceJoin  = Joiner.on(' ');
     
     options.addOption("source_type", null, true, 
                       "document source type: " + commaJoin.join(SourceFactory.getDocSourceList()));
@@ -177,7 +179,8 @@ public class LuceneIndexer {
         ++docNum;
 
         Document  luceneDoc = new Document();
-        String cleanText = textCleaner.cleanUp(inpDoc.mDocText);
+        ArrayList<String> cleanedToks = textCleaner.cleanUp(inpDoc.mDocText);
+        String cleanText = spaceJoin.join(cleanedToks);
         
 //        System.out.println(inpDoc.mDocId);
 //        System.out.println(cleanText);

@@ -16,6 +16,7 @@
 package apps;
 import org.apache.commons.cli.*;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Joiner;
 
 import java.io.*;
@@ -45,11 +46,37 @@ public class Source2XML {
     System.exit(1);
   }
   
+  
   static final Pattern mSomePunctPattern = Pattern.compile("[\\[\\]|+\\-#@\\^&~`\\\\]\\{\\}*");
   
   public static String replaceSomePunct(String s) {    
     Matcher m = mSomePunctPattern.matcher(s);
     return m.replaceAll(" ");
+  }
+  
+  static final int MAX_WORD_LEN = 64;
+  
+  /**
+   * 
+   * A good word should start from the letter: it may contain a letter,
+   * a dash, or an apostrophe. 
+   * 
+   * @param text        input
+   *     
+   * @return true if a good word.
+   */
+  protected static boolean isGoodWord(String text) {
+    if (text.isEmpty()) return false;
+    CharMatcher m = CharMatcher.JAVA_LETTER;
+    if (!m.matches(text.charAt(0))) return false;
+    for (int i = 0; i < text.length(); ++i) {
+      char c = text.charAt(i);
+      if (c != '-' && c != '\'' &&  !m.matches(c)) {
+        return false;
+      }
+    }
+        
+    return true;
   }
   
   public static void main(String [] args) {
@@ -63,6 +90,8 @@ public class Source2XML {
     
     options.addOption("source_type", null, true, 
                       "document source type: " + commaJoin.join(SourceFactory.getDocSourceList()));
+    
+    Joiner   spaceJoin  = Joiner.on(' ');
     
     CommandLineParser parser = new org.apache.commons.cli.GnuParser();
     
@@ -99,7 +128,9 @@ public class Source2XML {
       
       DocumentSource inpDocSource = SourceFactory.createDocumentSource(sourceName, inputFileName);
       DocumentEntry  inpDoc = null;
-      TextCleaner    textCleaner = new TextCleaner(null);
+      TextCleaner    textCleaner = 
+          new TextCleaner(new DictNoComments(new File("data/stopwords.txt"), true /* lower case */), 
+                          true /* use Stanford */, true /* lemmatize */);
     
       Map<String,String> outputMap = new HashMap<String,String>();
 
@@ -114,9 +145,17 @@ public class Source2XML {
       while ((inpDoc = inpDocSource.next()) != null) {
         ++docNum;
 
-        String partlyCleanedText = textCleaner.cleanUp(inpDoc.mDocText);
-        String cleanText = XmlHelper.removeInvaildXMLChars(partlyCleanedText); 
-        cleanText = replaceSomePunct(cleanText);
+        ArrayList<String> toks = textCleaner.cleanUp(inpDoc.mDocText);
+        ArrayList<String> goodToks = new ArrayList<String>();
+        for (String s : toks)
+          if (s.length() <= MAX_WORD_LEN && // Exclude long words as well 
+              isGoodWord(s)) 
+            goodToks.add(s);
+
+        String partlyCleanedText = spaceJoin.join(goodToks);
+        String cleanText = XmlHelper.removeInvaildXMLChars(partlyCleanedText);
+        // isGoodWord combiend with Stanford tokenizer should be quite restrictive already
+        //cleanText = replaceSomePunct(cleanText);
         
         outputMap.replace(UtilConst.XML_FIELD_DOCNO, inpDoc.mDocId);
         outputMap.replace(UtilConst.XML_FIELD_TEXT,  cleanText);

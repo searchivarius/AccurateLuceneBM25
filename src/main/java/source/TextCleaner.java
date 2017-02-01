@@ -14,6 +14,7 @@
  *  limitations under the License.
  */
 package source;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import utils.*;
@@ -37,6 +38,9 @@ public class TextCleaner {
   public TextCleaner(DictNoComments stopWords) {
     initTextCleaner(stopWords, UtilConst.USE_STANFORD, UtilConst.DO_LEMMATIZE);
   }
+  public TextCleaner(DictNoComments stopWords, boolean bUseStanford, boolean bLemmatize) {
+    initTextCleaner(stopWords, bUseStanford, bLemmatize);
+  }
   private void initTextCleaner(DictNoComments stopWords, 
                                boolean useStanford, 
                                boolean lemmatize) {
@@ -54,8 +58,8 @@ public class TextCleaner {
     }
   }
   
-  public String cleanUp(String text) {
-    StringBuffer sb = new StringBuffer();
+  public ArrayList<String> cleanUp(String text) {
+    ArrayList<String>  res = new ArrayList<String>();
     
     if (mUseStanford) {
       Annotation doc = new Annotation(text);
@@ -67,12 +71,12 @@ public class TextCleaner {
         String word = mLemmatize ?
                       token.get(LemmaAnnotation.class) :
                       token.get(TextAnnotation.class);
+        
         word = word.toLowerCase();
         // Ignore stop words if the stopword dictionary is present
 //        System.out.println(String.format("%s %b", word, mStopWords.contains(word)));
         if (mStopWords != null && mStopWords.contains(word)) continue; 
-        sb.append(word);
-        sb.append(' ');
+        res.add(word);
       }
     } else {
       // If Stanford is not present using a simpler tokenizer.
@@ -80,12 +84,10 @@ public class TextCleaner {
         String word = s.toLowerCase();
         // Ignore stop words if the stopword dictionary is present
         if (mStopWords != null && mStopWords.contains(word)) continue; 
-        sb.append(word);
-        sb.append(' ');        
+        res.add(word);        
       }
     }
-    return sb.toString();
- 
+    return res;
   }
   
   /**
