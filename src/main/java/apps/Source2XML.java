@@ -111,6 +111,14 @@ public class Source2XML {
       System.exit(1);
     }
     
+    //Stemmer stemmer = new Stemmer();
+    KrovetzStemmer stemmer = new KrovetzStemmer();
+    
+    System.out.println("Using Stanford NLP?        " + USE_STANFORD);
+    System.out.println("Using Stanford lemmatizer? " + USE_LEMMATIZER);
+    System.out.println("Using stemmer?             " + USE_STEMMER + 
+                        (USE_STEMMER ? " (class: " + stemmer.getClass().getCanonicalName() +")" :""));
+    
     try {
       CommandLine cmd = parser.parse(options, args);
       
@@ -154,8 +162,6 @@ public class Source2XML {
       if (reparseXML) 
         System.out.println("Will reparse every XML entry to verify correctness!");
       
-      //Stemmer stemmer = new Stemmer();
-      KrovetzStemmer stemmer = new KrovetzStemmer();
       
       while ((inpDoc = inpDocSource.next()) != null) {
         ++docNum;
