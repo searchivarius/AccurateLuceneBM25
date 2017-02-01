@@ -55,6 +55,9 @@ public class Source2XML {
   }
   
   static final int MAX_WORD_LEN = 64;
+  static final boolean LEMMATIZE = true;
+  static final boolean USE_STANFORD = true;
+
   
   /**
    * 
@@ -130,7 +133,7 @@ public class Source2XML {
       DocumentEntry  inpDoc = null;
       TextCleaner    textCleaner = 
           new TextCleaner(new DictNoComments(new File("data/stopwords.txt"), true /* lower case */), 
-                          true /* use Stanford */, true /* lemmatize */);
+                          USE_STANFORD /* use Stanford */, LEMMATIZE /* lemmatize */);
     
       Map<String,String> outputMap = new HashMap<String,String>();
 
