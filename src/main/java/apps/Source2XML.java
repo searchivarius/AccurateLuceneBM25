@@ -58,6 +58,8 @@ public class Source2XML {
   }
   
   static final int MAX_WORD_LEN = 64;
+  static final int MIN_WORD_LEN = 2;
+  
   static boolean USE_LEMMATIZER = false;
   static boolean USE_STANFORD = false;
   static boolean USE_STEMMER = true;
@@ -169,7 +171,8 @@ public class Source2XML {
         ArrayList<String> toks = textCleaner.cleanUp(inpDoc.mDocText);
         ArrayList<String> goodToks = new ArrayList<String>();
         for (String s : toks)
-          if (s.length() <= MAX_WORD_LEN && // Exclude long words as well 
+          if (s.length() <= MAX_WORD_LEN && // Exclude long and short words
+              s.length() >= MIN_WORD_LEN &&
               isGoodWord(s)) 
             goodToks.add(USE_STEMMER ? stemmer.stem(s) : s);
 
