@@ -19,6 +19,9 @@ import org.apache.commons.cli.*;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Joiner;
 
+//import edu.stanford.nlp.process.Stemmer;
+import org.lemurproject.kstem.KrovetzStemmer;
+
 import java.io.*;
 import java.util.*;
 import java.util.regex.*;
@@ -55,8 +58,9 @@ public class Source2XML {
   }
   
   static final int MAX_WORD_LEN = 64;
-  static final boolean LEMMATIZE = true;
-  static final boolean USE_STANFORD = true;
+  static boolean USE_LEMMATIZER = false;
+  static boolean USE_STANFORD = false;
+  static boolean USE_STEMMER = true;
 
   
   /**
@@ -102,6 +106,11 @@ public class Source2XML {
     
     int docNum = 0;
     
+    if (USE_LEMMATIZER && USE_STEMMER) {
+      System.err.println("Bug/inconsistent code: cann't use the stemmer and lemmatizer at the same time!");
+      System.exit(1);
+    }
+    
     try {
       CommandLine cmd = parser.parse(options, args);
       
@@ -133,7 +142,7 @@ public class Source2XML {
       DocumentEntry  inpDoc = null;
       TextCleaner    textCleaner = 
           new TextCleaner(new DictNoComments(new File("data/stopwords.txt"), true /* lower case */), 
-                          USE_STANFORD /* use Stanford */, LEMMATIZE /* lemmatize */);
+                          USE_STANFORD /* use Stanford */, USE_LEMMATIZER);
     
       Map<String,String> outputMap = new HashMap<String,String>();
 
@@ -145,6 +154,9 @@ public class Source2XML {
       if (reparseXML) 
         System.out.println("Will reparse every XML entry to verify correctness!");
       
+      //Stemmer stemmer = new Stemmer();
+      KrovetzStemmer stemmer = new KrovetzStemmer();
+      
       while ((inpDoc = inpDocSource.next()) != null) {
         ++docNum;
 
@@ -153,7 +165,7 @@ public class Source2XML {
         for (String s : toks)
           if (s.length() <= MAX_WORD_LEN && // Exclude long words as well 
               isGoodWord(s)) 
-            goodToks.add(s);
+            goodToks.add(USE_STEMMER ? stemmer.stem(s) : s);
 
         String partlyCleanedText = spaceJoin.join(goodToks);
         String cleanText = XmlHelper.removeInvaildXMLChars(partlyCleanedText);

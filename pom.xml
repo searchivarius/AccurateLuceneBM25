@@ -25,6 +25,14 @@
     </plugins>
   </build>
 
+  <repositories>
+    <repository>
+      <id>in-project-repository</id>
+      <url>file://${project.basedir}/lib</url>
+    </repository>
+  </repositories>
+
+
 	<dependencies>
     <dependency>
       <groupId>org.apache.lucene</groupId>
@@ -99,6 +107,12 @@
       <groupId>net.sourceforge.nekohtml</groupId>
       <artifactId>nekohtml</artifactId>
       <version>1.9.19</version>
+    </dependency>
+
+    <dependency>
+      <groupId>umass</groupId>
+      <artifactId>kstem</artifactId>
+      <version>3.4</version>
     </dependency>
 
 	</dependencies>
