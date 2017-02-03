@@ -76,16 +76,12 @@ public class Source2XML {
    */
   protected static boolean isGoodWord(String text) {
     if (text.isEmpty()) return false;
-    CharMatcher m = CharMatcher.JAVA_LETTER;
-    if (!m.matches(text.charAt(0))) return false;
-    for (int i = 0; i < text.length(); ++i) {
-      char c = text.charAt(i);
-      if (c != '-' && c != '\'' &&  !m.matches(c)) {
-        return false;
-      }
-    }
-        
-    return true;
+    // 
+    CharMatcher m = (CharMatcher.JAVA_LETTER_OR_DIGIT).and(CharMatcher.ASCII);
+    m = m.or(CharMatcher.is('-'));
+    m = m.or(CharMatcher.is('\''));
+    
+    return m.matchesAllOf(text);
   }
   
   public static void main(String [] args) {
