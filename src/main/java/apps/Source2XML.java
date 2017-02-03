@@ -1,5 +1,5 @@
 /*
- *  Copyright 2015 Carnegie Mellon University
+ *  Copyright 2017 Carnegie Mellon University
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -60,9 +60,9 @@ public class Source2XML {
   static final int MAX_WORD_LEN = 64;
   static final int MIN_WORD_LEN = 2;
   
-  static boolean USE_LEMMATIZER = false;
-  static boolean USE_STANFORD = false;
-  static boolean USE_STEMMER = true;
+  public static boolean USE_LEMMATIZER = false;
+  public static boolean USE_STANFORD = false;
+  public static boolean USE_STEMMER = true;
 
   
   /**
@@ -152,7 +152,7 @@ public class Source2XML {
       DocumentEntry  inpDoc = null;
       TextCleaner    textCleaner = 
           new TextCleaner(new DictNoComments(new File("data/stopwords.txt"), true /* lower case */), 
-                          USE_STANFORD /* use Stanford */, USE_LEMMATIZER);
+                          USE_STANFORD, USE_LEMMATIZER);
     
       Map<String,String> outputMap = new HashMap<String,String>();
 
