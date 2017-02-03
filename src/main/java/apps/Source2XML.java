@@ -227,7 +227,10 @@ public class Source2XML {
       System.out.println(String.format("Processed %d documents", docNum));
       
       try {
-        if (null != outputFile) outputFile.close();
+        if (null != outputFile) {
+          outputFile.close();
+          System.out.println("Output file is closed! all seems to be fine...");
+        }
       } catch (IOException e) {
         System.err.println("IO exception: " + e);
         e.printStackTrace();
