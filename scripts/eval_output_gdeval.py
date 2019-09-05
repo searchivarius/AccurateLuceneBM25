@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import argparse
 import sys
 import math
@@ -7,8 +7,8 @@ import subprocess as sp
 
 def Usage(err):
   if not err is None:
-    print err
-  print "Usage: <path to gdeval script> <qrel file> <trec-format output file> <prefix of report files> "
+    print(err)
+  print("Usage: <path to gdeval script> <qrel file> <trec-format output file> <prefix of report files> ")
   sys.exit(1)
 
 def saveTsv(fname, arr):
@@ -46,7 +46,7 @@ gdevalScript=sys.argv[1]
 qrelFile=sys.argv[2]
 trecOut=sys.argv[3]
 outPrefix = sys.argv[4]
-output=sp.check_output([gdevalScript, qrelFile, trecOut]).replace('\t', ' ').split('\n')
+output=sp.check_output([gdevalScript, qrelFile, trecOut]).decode().replace('\t', ' ').split('\n')
 res=readResults(output)
 
 err20_overall=res['amean'][ERR20]
@@ -56,7 +56,7 @@ queryQty=0
 val_ndcg20   = []
 val_err20    = []
 
-for qid, entry in res.iteritems():
+for qid, entry in res.items():
   if qid == 'amean': continue
   queryQty+=1
   val_ndcg20.append(entry[NDCG20])

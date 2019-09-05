@@ -84,6 +84,7 @@ public class YahooAnswersStreamParser implements Iterator<ParsedQuestion> {
       switch (mReader.next()) {
         case XMLStreamConstants.START_ELEMENT:
           switch (mReader.getLocalName()) {
+            case "document" : // synonym for vespadd 
             case "vespaadd" : bStart = true; break;
           }
           break;
@@ -92,6 +93,7 @@ public class YahooAnswersStreamParser implements Iterator<ParsedQuestion> {
           break;
         case XMLStreamConstants.END_ELEMENT:
           switch (mReader.getLocalName()) {
+            case "document" : // synonym for vespadd           
             case "vespaadd" : 
               return new ParsedQuestion(question, questDetail, questUri,
                                           answers, bestAnsw, mDoCleanUp);
