@@ -8,7 +8,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <lucene.version>8.0.0</lucene.version>
-    <stanford.version>3.5.2</stanford.version>
+    <stanford.version>4.4.0</stanford.version>
   </properties>
 
   <build>
